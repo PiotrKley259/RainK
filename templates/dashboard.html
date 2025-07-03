@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RainK - Tableau de bord</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: #f9f9fb;
+      color: #111;
+      padding: 40px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .metrics {
+      display: flex;
+      gap: 40px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+
+    .card {
+      background: white;
+      padding: 20px 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+      flex: 1 1 200px;
+    }
+
+    .card h2 {
+      font-size: 1.5rem;
+      margin: 0 0 10px;
+    }
+
+    canvas {
+      max-width: 100%;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bienvenue, utilisateur test</h1>
+  <div class="metrics">
+    <div class="card">
+      <h2>Total économisé</h2>
+      <p id="saved">Chargement...</p>
+    </div>
+    <div class="card">
+      <h2>Investi en bourse</h2>
+      <p id="invested">Chargement...</p>
+    </div>
+  </div>
+
+  <canvas id="investmentChart" height="300"></canvas>
+
+  <script>
+    async function fetchData() {
+      const balanceRes = await fetch("/investment-balance");
+      const balanceData = await balanceRes.json();
+      document.getElementById("invested").textContent = balanceData.balance.toFixed(2) + " €";
+
+      const roundupRes = await fetch("/simulate-roundup");
+      const roundupData = await roundupRes.json();
+      if (roundupData.total !== undefined) {
+        document.getElementById("saved").textContent = roundupData.total.toFixed(2) + " €";
+      }
+    }
+
+    fetchData();
+
+    const ctx = document.getElementById('investmentChart').getContext('2d');
+    const investmentChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ["S1", "S2", "S3", "S4", "S5", "S6"],
+        datasets: [{
+          label: "Solde investi",
+          data: [10, 25, 40, 50, 68, 80],
+          backgroundColor: 'rgba(0, 200, 83, 0.2)',
+          borderColor: '#00c853',
+          borderWidth: 2,
+          tension: 0.3,
+          fill: true,
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

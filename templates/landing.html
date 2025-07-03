@@ -56,6 +56,21 @@
       font-weight: 500;
     }
 
+    .btn-primary {
+      background: #000;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
+
+    .btn-primary:hover {
+      background: #333;
+    }
+
     .hero {
       background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1606761568499-e3b38dc4aef5?auto=format&fit=crop&w=1950&q=80') center/cover no-repeat;
       color: white;
@@ -78,21 +93,6 @@
       font-size: 1.2rem;
       max-width: 600px;
       margin: 0 auto 30px;
-    }
-
-    .btn-primary {
-      background: #fff;
-      color: #000;
-      padding: 14px 36px;
-      border-radius: 40px;
-      font-weight: 600;
-      font-size: 1rem;
-      text-decoration: none;
-      transition: background 0.3s;
-    }
-
-    .btn-primary:hover {
-      background: #e5e5e5;
     }
 
     section {
@@ -159,6 +159,7 @@
       <a href="#fonctionnement">Fonctionnement</a>
       <a href="#tarifs">Tarifs</a>
       <a href="#apropos">À propos</a>
+      <a href="/dashboard" class="btn-primary" style="margin-left: 2rem;">Se connecter</a>
     </nav>
   </header>
 
