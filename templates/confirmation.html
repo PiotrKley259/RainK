@@ -1,0 +1,43 @@
+<!-- templates/confirmation.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Transfert confirmé</title>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f0f8ff;
+      text-align: center;
+      padding-top: 10vh;
+    }
+
+    .msg {
+      font-size: 1.5rem;
+      color: #007bff;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 2rem;
+      text-decoration: none;
+      color: #fff;
+      background-color: #007bff;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+    }
+
+    a:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="msg">
+    ✅ {{ message }}<br/>
+    💶 Montant transféré : {{ amount }} €<br/>
+    📈 Nouveau solde d'investissement : {{ balance }} €
+  </div>
+  <a href="/app">← Retour à la tirelire</a>
+</body>
+</html>

@@ -24,13 +24,28 @@
       color: #007bff;
     }
 
-    button {
-      padding: 0.6rem 1rem;
+    a, select, button {
       font-size: 1rem;
-      border: none;
+      margin-top: 1rem;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    select, button {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
       background-color: #007bff;
       color: white;
-      border-radius: 8px;
+      border: none;
       cursor: pointer;
     }
 
@@ -42,7 +57,18 @@
 <body>
   <div class="piggy">🐷</div>
   <div class="amount" id="total">Chargement...</div>
-  <button onclick="refreshRoundup()">🔁 Simuler mes économies</button>
+
+  <form id="transferForm" action="/transfer-roundup" method="POST">
+    <label for="sourceAccount">Choisir un compte source :</label>
+    <select name="sourceAccount" id="sourceAccount" required>
+      <option value="">-- Sélectionnez un compte --</option>
+      <option value="account1">Compte courant</option>
+      <option value="account2">Livret A</option>
+      <option value="account3">Compte joint</option>
+    </select>
+    <input type="hidden" name="amount" id="amountInput" />
+    <button type="submit">💸 Transférer vers mon compte personnel</button>
+  </form>
 
   <script>
     async function refreshRoundup() {
@@ -52,6 +78,7 @@
 
       if (data.total !== undefined) {
         document.getElementById("total").textContent = `💰 ${data.total.toFixed(2)} € économisés`;
+        document.getElementById("amountInput").value = data.total.toFixed(2);
       } else {
         document.getElementById("total").textContent = "Erreur : " + (data.message || "inconnue");
       }
