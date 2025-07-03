@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Ma Tirelire 🐷</title>
+  <title>Ma Tirelire</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
   <style>
     * {
@@ -23,11 +23,6 @@
       text-align: center;
     }
 
-    .piggy {
-      font-size: 5rem;
-      margin-bottom: 1rem;
-    }
-
     .amount {
       font-size: 2rem;
       font-weight: 600;
@@ -35,30 +30,27 @@
       color: #000;
     }
 
-    form {
-      width: 100%;
+    .info {
+      font-size: 1rem;
+      color: #555;
+      margin-bottom: 2rem;
       max-width: 400px;
+    }
+
+    form {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      align-items: center;
+      width: 100%;
+      max-width: 400px;
     }
 
-    label {
-      font-size: 1rem;
-      font-weight: 500;
-      text-align: left;
-    }
-
-    select {
-      padding: 0.75rem 1rem;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 0.75rem;
-      background-color: #f9f9f9;
+    input[type="hidden"] {
+      display: none;
     }
 
     button {
-      padding: 1rem;
+      padding: 1rem 2rem;
       font-size: 1rem;
       font-weight: 600;
       background-color: #000;
@@ -67,6 +59,7 @@
       border-radius: 2rem;
       cursor: pointer;
       transition: background 0.3s ease;
+      width: 100%;
     }
 
     button:hover {
@@ -78,6 +71,10 @@
         font-size: 1.6rem;
       }
 
+      .info {
+        font-size: 0.95rem;
+      }
+
       button {
         font-size: 0.95rem;
         padding: 0.9rem;
@@ -86,20 +83,14 @@
   </style>
 </head>
 <body>
-  <div class="piggy">🐷</div>
   <div class="amount" id="total">Chargement...</div>
+  <div class="info">
+    Cette somme correspond à l’arrondi de vos achats récents. Vous pouvez la transférer vers votre compte d’investissement en un clic.
+  </div>
 
   <form id="transferForm" action="/transfer-roundup" method="POST">
-    <label for="sourceAccount">Compte source</label>
-    <select name="sourceAccount" id="sourceAccount" required>
-      <option value="">-- Sélectionner un compte --</option>
-      <option value="account1">Compte courant</option>
-      <option value="account2">Livret A</option>
-      <option value="account3">Compte joint</option>
-    </select>
-
     <input type="hidden" name="amount" id="amountInput" />
-    <button type="submit">💸 Transférer vers mon compte</button>
+    <button type="submit">Transférer mes économies</button>
   </form>
 
   <script>
@@ -111,7 +102,7 @@
 
         if (data.total !== undefined) {
           const amount = parseFloat(data.total).toFixed(2);
-          document.getElementById("total").textContent = `💰 ${amount} € économisés`;
+          document.getElementById("total").textContent = `${amount} € économisés`;
           document.getElementById("amountInput").value = amount;
         } else {
           document.getElementById("total").textContent = "Erreur : " + (data.message || "inconnue");

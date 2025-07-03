@@ -13,44 +13,41 @@
 
     body {
       margin: 0;
-      padding: 0;
       font-family: 'Inter', sans-serif;
-      height: 100vh;
       background: url('https://images.unsplash.com/photo-1508264165352-258db2ebd59b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80') center/cover no-repeat;
-      position: relative;
       color: #fff;
+      position: relative;
+      min-height: 100vh;
     }
 
-    /* Overlay sombre pour lisibilité */
     body::before {
       content: "";
       position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
+      inset: 0;
       background: rgba(0, 0, 0, 0.6);
       z-index: 0;
     }
 
-    .hero {
+    .content {
       position: relative;
       z-index: 1;
-      text-align: center;
-      padding: 40px 20px;
       max-width: 800px;
       margin: auto;
+      padding: 60px 20px 80px;
+      text-align: center;
     }
 
-    .hero h1 {
-      font-size: 3.5rem;
+    h1 {
+      font-size: 3.2rem;
       font-weight: 800;
-      margin-bottom: 20px;
-      line-height: 1.2;
+      margin-bottom: 1rem;
     }
 
-    .hero p {
-      font-size: 1.25rem;
-      font-weight: 400;
+    p {
+      font-size: 1.2rem;
       color: #ddd;
-      margin-bottom: 40px;
+      margin-bottom: 2.5rem;
+      line-height: 1.6;
     }
 
     .btn {
@@ -69,24 +66,70 @@
       background: #e0e0e0;
     }
 
+    .section {
+      background-color: #fff;
+      color: #000;
+      padding: 60px 20px;
+      text-align: center;
+    }
+
+    .section h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+
+    .section p {
+      font-size: 1.1rem;
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.6;
+      color: #333;
+    }
+
     @media (max-width: 600px) {
-      .hero h1 {
+      h1 {
         font-size: 2.2rem;
       }
 
-      .hero p {
+      p {
+        font-size: 1rem;
+      }
+
+      .section h2 {
+        font-size: 1.6rem;
+      }
+
+      .section p {
         font-size: 1rem;
       }
     }
   </style>
 </head>
 <body>
-  <div class="hero">
+  <div class="content">
     <h1>Investis sans effort, en toute simplicité</h1>
-    <p>Chaque dépense quotidienne est une opportunité d'épargner. Arrondis tes achats et investis la différence automatiquement.</p>
+    <p>
+      Chaque dépense quotidienne est une opportunité d'épargner intelligemment. Avec RainK, tes achats sont automatiquement arrondis, et la différence est investie dans des portefeuilles adaptés.
+    </p>
     <button class="btn" onclick="window.location.href='https://raink.onrender.com/app'">
       Commencer
     </button>
+  </div>
+
+  <div class="section">
+    <h2>Comprendre RainK</h2>
+    <p>
+      Dans le monde d'aujourd'hui, on entend souvent dire qu'il faut investir — mais trop souvent, cela reste flou : où commencer, comment s’y prendre, et avec quels moyens ?<br><br>
+      RainK simplifie tout cela. En connectant ton compte bancaire à une plateforme d’investissement, chaque petit montant mis de côté est automatiquement transféré vers un portefeuille intelligent. Ton argent commence alors à travailler pour toi, sans effort, dans les bons secteurs, avec transparence.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>À propos de moi</h2>
+    <p>
+      Je suis étudiant en ingénierie financière à l’EPFL, passionné par les marchés et la technologie. Mon objectif avec RainK est clair : rendre l’investissement en bourse simple, automatique et accessible à tous, même sans connaissances financières. Parce que l’investissement ne devrait pas être réservé à une élite, mais faire partie de notre quotidien.
+    </p>
   </div>
 </body>
 </html>
