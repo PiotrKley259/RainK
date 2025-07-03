@@ -14,6 +14,11 @@ SALT_EDGE_API_URL = "https://www.saltedge.com/api/v5"
 # Simulated user store (memory)
 users = {}
 
+# Simulated investment account
+investment_account = {
+    "balance": 0.0
+}
+
 def get_headers():
     return {
         "App-id": SALT_EDGE_APP_ID,
@@ -26,7 +31,6 @@ def get_headers():
 def landing():
     return render_template("landing.html")
 
-
 @app.route("/app")
 def home():
     return render_template("index.html")
@@ -35,7 +39,6 @@ def home():
 def connect_bank():
     identifier = "user1"
 
-    # Step 1: Try creating the customer
     customer_resp = requests.post(
         f"{SALT_EDGE_API_URL}/customers",
         headers=get_headers(),
@@ -44,9 +47,7 @@ def connect_bank():
 
     if customer_resp.status_code == 200:
         customer_id = customer_resp.json()["data"]["id"]
-
     elif customer_resp.status_code == 409:
-        # Already exists → get by identifier
         existing_resp = requests.get(
             f"{SALT_EDGE_API_URL}/customers",
             headers=get_headers(),
@@ -64,7 +65,6 @@ def connect_bank():
             "details": customer_resp.text
         }), 400
 
-    # Step 2: Create Salt Edge Connect Session
     session_resp = requests.post(
         f"{SALT_EDGE_API_URL}/connect_sessions/create",
         headers=get_headers(),
@@ -75,7 +75,7 @@ def connect_bank():
                     "scopes": ["account_details", "transactions_details"]
                 },
                 "attempt": {
-                    "return_to": "https://raink.onrender.com/callback"  # 🔁 redirection vers ton domaine Render
+                    "return_to": "https://raink.onrender.com/callback"
                 }
             }
         }
@@ -111,7 +111,6 @@ def simulate_roundup():
             "total": user["roundup_total"]
         })
 
-    # 🔧 Exemple factice (remplace avec transactions Salt Edge si tu veux)
     fake_transactions = [
         {"amount": -2.75},
         {"amount": -9.20},
@@ -135,6 +134,31 @@ def simulate_roundup():
         "total": user["roundup_total"]
     })
 
+@app.route("/transfer-roundup", methods=["POST"])
+def transfer_roundup():
+    user = users.get("user1")
+    if not user:
+        return jsonify({"error": "Utilisateur non connecté"}), 400
+
+    amount = user["roundup_total"]
+    if amount <= 0:
+        return jsonify({"message": "Aucun montant à transférer"}), 200
+
+    investment_account["balance"] += amount
+    user["roundup_total"] = 0.0
+
+    return jsonify({
+        "message": "Round-up transféré avec succès",
+        "transferred_amount": amount,
+        "investment_balance": investment_account["balance"]
+    })
+
+@app.route("/investment-balance")
+def investment_balance():
+    return jsonify({
+        "balance": investment_account["balance"]
+    })
+
 @app.route("/reset", methods=["POST"])
 def reset_customer():
     identifier = "user1"
@@ -154,4 +178,3 @@ def reset_customer():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
-
