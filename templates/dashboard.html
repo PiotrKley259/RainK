@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard – RainK</title>
+  <title>Tableau de bord – RainK</title>
   <style>
     body {
       font-family: 'Inter', sans-serif;
@@ -12,12 +12,12 @@
       color: #111;
     }
     h1 {
-      margin-bottom: 10px;
+      margin-bottom: 5px;
       font-size: 1.8rem;
     }
     p {
       color: #555;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
     }
     a.button {
       display: inline-block;
@@ -32,7 +32,6 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
       background: #fff;
       border-radius: 8px;
       overflow: hidden;
@@ -46,29 +45,26 @@
     th {
       background: #f3f3f3;
     }
-    form button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background: #000;
-      color: #fff;
-      border: none;
-      border-radius: 30px;
-      font-weight: 600;
-      cursor: pointer;
+    .summary {
+      margin-bottom: 30px;
     }
   </style>
 </head>
 <body>
-  <h1>Bienvenue, {{ email }}</h1>
-  {% if last_import %}
-    <p>Dernier import : {{ last_import }}</p>
-  {% else %}
-    <p>Aucun fichier n’a encore été importé.</p>
-  {% endif %}
-  <a class="button" href="{{ url_for('upload') }}">Importer un fichier CSV</a>
+  <h1>Bonjour {{ first_name }}</h1>
+
+  <div class="summary">
+    {% if last_import %}
+      <p>Dernier fichier importé le : <strong>{{ last_import }}</strong></p>
+    {% else %}
+      <p>Aucun fichier importé pour le moment.</p>
+    {% endif %}
+    <p>Montant total investi automatiquement : <strong>{{ "%.2f"|format(invested) }} €</strong></p>
+    <a class="button" href="{{ url_for('upload') }}">Importer un nouveau fichier CSV</a>
+  </div>
 
   {% if roundups %}
-    <h2>Arrondis mensuels</h2>
+    <h2>Historique des arrondis mensuels</h2>
     <table>
       <tr>
         <th>Mois</th>
@@ -81,9 +77,6 @@
       </tr>
       {% endfor %}
     </table>
-    <form method="post" action="{{ url_for('transfer') }}">
-      <button type="submit">Simuler le transfert</button>
-    </form>
   {% endif %}
 </body>
 </html>

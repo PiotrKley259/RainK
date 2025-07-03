@@ -2,61 +2,82 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Créer mon compte RainK</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <title>Créer un compte – RainK</title>
   <style>
     body {
       font-family: 'Inter', sans-serif;
-      background: #f4f4f4;
+      background: #f9f9fb;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       height: 100vh;
+      margin: 0;
     }
-    form {
-      background: white;
+    .container {
+      background: #fff;
       padding: 40px;
       border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      max-width: 500px;
       width: 100%;
-      max-width: 400px;
     }
     h2 {
-      margin-bottom: 20px;
-      font-weight: 600;
+      text-align: center;
+      margin-bottom: 30px;
+      font-weight: 700;
     }
     input {
       width: 100%;
       padding: 12px;
-      margin: 10px 0 20px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
       border-radius: 8px;
-      border: 1px solid #ccc;
+      font-size: 1rem;
     }
     button {
+      width: 100%;
+      padding: 12px;
       background: #000;
       color: #fff;
       border: none;
-      padding: 12px 20px;
       border-radius: 30px;
-      font-weight: bold;
-      width: 100%;
+      font-weight: 600;
       cursor: pointer;
+    }
+    button:hover {
+      background: #333;
     }
     .error {
       color: red;
-      font-size: 0.9rem;
+      margin-bottom: 15px;
+      text-align: center;
+      font-size: 0.95rem;
+    }
+    a {
+      display: block;
+      text-align: center;
+      margin-top: 15px;
+      color: #000;
+      text-decoration: none;
+      font-size: 0.95rem;
     }
   </style>
 </head>
 <body>
-  <form method="POST">
-    <h2>Créer mon compte</h2>
+  <div class="container">
+    <h2>Créer un compte</h2>
     {% if error %}
-      <p class="error">{{ error }}</p>
+      <div class="error">{{ error }}</div>
     {% endif %}
-    <input type="email" name="email" placeholder="Email" required />
-    <input type="password" name="password" placeholder="Mot de passe" required />
-    <button type="submit">Créer mon compte</button>
-  </form>
+    <form method="post">
+      <input type="text" name="first_name" placeholder="Prénom" required>
+      <input type="text" name="last_name" placeholder="Nom" required>
+      <input type="email" name="email" placeholder="Adresse email" required>
+      <input type="password" name="password" placeholder="Mot de passe" required>
+      <input type="date" name="dob" placeholder="Date de naissance" required>
+      <button type="submit">Créer mon compte</button>
+    </form>
+    <a href="{{ url_for('login') }}">Déjà inscrit ? Se connecter</a>
+  </div>
 </body>
 </html>

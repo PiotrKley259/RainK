@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Import CSV – RainK</title>
+  <title>Importer un fichier CSV – RainK</title>
   <style>
     body {
       font-family: 'Inter', sans-serif;
@@ -64,9 +64,9 @@
     <form method="post" enctype="multipart/form-data">
       <input type="file" name="csvfile" accept=".csv" required>
       <br>
-      <button type="submit">Analyser les arrondis</button>
+      <button type="submit">Analyser les arrondis du mois précédent</button>
     </form>
-    <a href="{{ url_for('dashboard') }}">← Retour au dashboard</a>
+    <a href="{{ url_for('dashboard') }}">← Retour au tableau de bord</a>
   </div>
 </body>
 </html>
