@@ -9,9 +9,9 @@ import os
 app = Flask(__name__)
 app.secret_key = "supersecret"
 
-# Simuler la "base de données" en mémoire
-users_data = {}  # email -> user info
-investment_accounts = {}  # email -> balance
+# Simuler une base de données
+users_data = {}  # email -> informations utilisateur
+investment_accounts = {}  # email -> solde investi
 
 @app.route("/")
 def landing():
@@ -134,10 +134,8 @@ def investment_balance():
 
 @app.route("/admin/users")
 def admin_users():
-    # Pour sécuriser, ajoute un mot de passe plus tard
+    # Sécurisation à ajouter plus tard si nécessaire
     return render_template("admin_users.html", users=users_data)
-
-
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
