@@ -1,62 +1,78 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bienvenue - Sauver ton argent</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sauver ton argent</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
     body {
-      font-family: sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #f0f4f8;
+      background-color: #ffffff;
+      color: #000;
+      font-family: 'Inter', sans-serif;
+      height: 100vh;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
+    }
+
+    .hero {
       text-align: center;
+      padding: 40px 20px;
+      max-width: 800px;
     }
 
-    .container {
-      max-width: 600px;
-      padding: 20px;
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 800;
+      margin-bottom: 20px;
+      line-height: 1.2;
     }
 
-    h1 {
-      font-size: 2em;
-      margin-bottom: 0.5em;
-    }
-
-    p {
-      font-size: 1.2em;
-      margin-bottom: 2em;
+    .hero p {
+      font-size: 1.25rem;
+      font-weight: 400;
+      color: #555;
+      margin-bottom: 40px;
     }
 
     .btn {
-      background-color: #007bff;
-      color: white;
-      padding: 15px 30px;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 14px 28px;
+      background: #000;
+      color: #fff;
       border: none;
-      border-radius: 10px;
-      font-size: 1em;
+      border-radius: 50px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: background 0.3s ease;
     }
 
     .btn:hover {
-      background-color: #0056b3;
+      background: #333;
+    }
+
+    @media (max-width: 600px) {
+      .hero h1 {
+        font-size: 2.2rem;
+      }
+
+      .hero p {
+        font-size: 1rem;
+      }
     }
   </style>
 </head>
 <body>
-
-  <div class="container">
-    <h1>Sauve ton argent sans y penser</h1>
-    <p>Chaque achat quotidien arrondit tes dépenses et investit la différence en bourse. Automatiquement, simplement, intelligemment.</p>
-    <button class="btn" onclick="window.location.href='https://raink.onrender.com/app'">Se lancer dans l'aventure</button>
-
+  <div class="hero">
+    <h1>Investis sans effort, en toute simplicité</h1>
+    <p>Chaque dépense quotidienne est une opportunité d'épargner. Arrondis tes achats et investis la différence automatiquement.</p>
+    <button class="btn" onclick="window.location.href='https://raink.onrender.com/app'">
+      Commencer
+    </button>
   </div>
-
 </body>
 </html>
