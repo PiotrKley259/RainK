@@ -3,9 +3,15 @@ import requests
 import math
 import datetime
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "supersecret")
+
+FIREFLY_INSTANCE_URL = os.environ.get("FIREFLY_INSTANCE_URL", "").rstrip("/")
+FIREFLY_ADMIN_TOKEN = os.environ.get("FIREFLY_ADMIN_TOKEN")
 
 # Stockage des données utilisateur en mémoire
 users = {}
@@ -19,29 +25,58 @@ investment_account = {
 def landing():
     return render_template("landing.html")
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
+@app.route("/register", methods=["GET", "POST"])
+def register():
     if request.method == "POST":
-        firefly_url = request.form.get("firefly_url").rstrip("/")
-        token = request.form.get("access_token")
+        email = request.form.get("email")
+        password = request.form.get("password")
 
-        # Stockage temporaire en session + en mémoire
-        session["user_id"] = "user1"
-        users["user1"] = {
-            "firefly_url": firefly_url,
+        # Créer l'utilisateur sur Firefly III
+        user_resp = requests.post(
+            f"{FIREFLY_INSTANCE_URL}/api/v1/user",
+            headers={"Authorization": f"Bearer {FIREFLY_ADMIN_TOKEN}", "Accept": "application/json"},
+            json={"email": email, "password": password}
+        )
+
+        if user_resp.status_code != 200:
+            return render_template("register.html", error="Erreur lors de la création du compte Firefly.")
+
+        user_id = user_resp.json()["data"]["id"]
+
+        # Créer un token API personnel pour cet utilisateur
+        token_resp = requests.post(
+            f"{FIREFLY_INSTANCE_URL}/api/v1/personal_tokens",
+            headers={"Authorization": f"Bearer {FIREFLY_ADMIN_TOKEN}", "Accept": "application/json"},
+            json={
+                "name": f"Token {email}",
+                "user_id": user_id,
+                "permissions": ["*"]
+            }
+        )
+
+        if token_resp.status_code != 200:
+            return render_template("register.html", error="Erreur lors de la création du token API.")
+
+        token = token_resp.json()["data"]["token"]
+
+        # Stocker en session et mémoire
+        session["user_id"] = email
+        users[email] = {
+            "firefly_url": f"{FIREFLY_INSTANCE_URL}/api/v1",
             "token": token,
             "roundup_total": 0.0,
             "last_roundup_date": None
         }
+
         return redirect(url_for("dashboard"))
-    
-    return render_template("login.html")
+
+    return render_template("register.html")
 
 @app.route("/dashboard")
 def dashboard():
     user_id = session.get("user_id")
     if not user_id or user_id not in users:
-        return redirect(url_for("login"))
+        return redirect(url_for("register"))
     return render_template("dashboard.html")
 
 def firefly_headers(user):
@@ -67,7 +102,7 @@ def simulate_roundup():
     last_week = (datetime.date.today() - datetime.timedelta(days=7)).isoformat()
 
     resp = requests.get(
-        f"{user['firefly_url']}/api/v1/transactions",
+        f"{user['firefly_url']}/transactions",
         headers=firefly_headers(user),
         params={"start": last_week, "type": "withdrawal"}
     )
