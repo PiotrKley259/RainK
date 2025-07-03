@@ -82,8 +82,8 @@ def upload():
 
         for row in reader:
             try:
-                amount = abs(float(row.get("amount", 0)))
-                date_str = row.get("date", "")
+                amount = abs(float(row.get("Amount", 0)))
+                date_str = row.get("Completed Date", "")
                 if not date_str or amount == 0:
                     continue
 
@@ -131,6 +131,13 @@ def investment_balance():
         return jsonify({"error": "Non connecté"}), 401
 
     return jsonify({"balance": investment_accounts[email]})
+
+@app.route("/admin/users")
+def admin_users():
+    # Pour sécuriser, ajoute un mot de passe plus tard
+    return render_template("admin_users.html", users=users_data)
+
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
