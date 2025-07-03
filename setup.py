@@ -138,20 +138,22 @@ def simulate_roundup():
 def transfer_roundup():
     user = users.get("user1")
     if not user:
-        return jsonify({"error": "Utilisateur non connecté"}), 400
+        return render_template("confirmation.html", message="Utilisateur non connecté", amount=0, balance=investment_account["balance"])
+
+    source_account = request.form.get("sourceAccount")
+    requested_amount = request.form.get("amount", type=float)
 
     amount = user["roundup_total"]
     if amount <= 0:
-        return jsonify({"message": "Aucun montant à transférer"}), 200
+        return render_template("confirmation.html", message="Aucun montant à transférer", amount=0, balance=investment_account["balance"])
 
     investment_account["balance"] += amount
     user["roundup_total"] = 0.0
 
-    return jsonify({
-        "message": "Round-up transféré avec succès",
-        "transferred_amount": amount,
-        "investment_balance": investment_account["balance"]
-    })
+    return render_template("confirmation.html",
+                           message=f"Transfert depuis « {source_account} » effectué avec succès.",
+                           amount=amount,
+                           balance=investment_account["balance"])
 
 @app.route("/investment-balance")
 def investment_balance():
