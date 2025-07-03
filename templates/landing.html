@@ -3,88 +3,114 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sauver ton argent</title>
+  <title>RainK – Ta tirelire intelligente</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet" />
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
-
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      margin: 0;
       font-family: 'Inter', sans-serif;
-      background: url('https://images.unsplash.com/photo-1508264165352-258db2ebd59b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80') center/cover no-repeat;
+      background: #fafafa;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    section {
+      padding: 60px 20px;
+    }
+
+    .hero {
+      background: url('https://images.unsplash.com/photo-1508264165352-258db2ebd59b?auto=format&fit=crop&w=1950&q=80') center/cover no-repeat;
+      position: relative;
       color: #fff;
-      position: relative;
-      min-height: 100vh;
-    }
-
-    body::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.6);
-      z-index: 0;
-    }
-
-    .content {
-      position: relative;
-      z-index: 1;
-      max-width: 800px;
-      margin: auto;
-      padding: 60px 20px 80px;
       text-align: center;
     }
 
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .hero .inner {
+      position: relative;
+      z-index: 1;
+      max-width: 700px;
+      margin: auto;
+      padding: 120px 20px;
+    }
+
     h1 {
-      font-size: 3.2rem;
+      font-size: 2.8rem;
       font-weight: 800;
       margin-bottom: 1rem;
     }
 
+    h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
     p {
-      font-size: 1.2rem;
-      color: #ddd;
-      margin-bottom: 2.5rem;
-      line-height: 1.6;
+      margin-bottom: 1.5rem;
     }
 
     .btn {
-      font-size: 1rem;
-      font-weight: 600;
-      padding: 14px 28px;
+      display: inline-block;
       background: #fff;
       color: #000;
-      border: none;
+      padding: 14px 28px;
       border-radius: 50px;
-      cursor: pointer;
-      transition: background 0.3s ease;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.3s;
     }
 
     .btn:hover {
       background: #e0e0e0;
     }
 
-    .section {
-      background-color: #fff;
-      color: #000;
-      padding: 60px 20px;
-      text-align: center;
+    .features, .pricing, .about {
+      background: #fff;
+      max-width: 800px;
+      margin: auto;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+      margin-bottom: 40px;
     }
 
-    .section h2 {
-      font-size: 2rem;
-      font-weight: 700;
-      margin-bottom: 1.5rem;
+    .features ul {
+      list-style: none;
+      padding: 40px 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
     }
 
-    .section p {
-      font-size: 1.1rem;
-      max-width: 700px;
-      margin: 0 auto;
-      line-height: 1.6;
-      color: #333;
+    .features li {
+      font-weight: 500;
+    }
+
+    .pricing table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 40px 20px;
+    }
+
+    .pricing th, .pricing td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+
+    .pricing th {
+      font-weight: 600;
+    }
+
+    .about p {
+      padding: 40px 20px;
     }
 
     @media (max-width: 600px) {
@@ -92,44 +118,52 @@
         font-size: 2.2rem;
       }
 
-      p {
-        font-size: 1rem;
-      }
-
-      .section h2 {
-        font-size: 1.6rem;
-      }
-
-      .section p {
-        font-size: 1rem;
+      .hero .inner {
+        padding: 80px 20px;
       }
     }
   </style>
 </head>
 <body>
-  <div class="content">
-    <h1>Investis sans effort, en toute simplicité</h1>
-    <p>
-      Chaque dépense quotidienne est une opportunité d'épargner intelligemment. Avec RainK, tes achats sont automatiquement arrondis, et la différence est investie dans des portefeuilles adaptés.
-    </p>
-    <button class="btn" onclick="window.location.href='https://raink.onrender.com/app'">
-      Commencer
-    </button>
-  </div>
 
-  <div class="section">
-    <h2>Comprendre RainK</h2>
-    <p>
-      Dans le monde d'aujourd'hui, on entend souvent dire qu'il faut investir — mais trop souvent, cela reste flou : où commencer, comment s’y prendre, et avec quels moyens ?<br><br>
-      RainK simplifie tout cela. En connectant ton compte bancaire à une plateforme d’investissement, chaque petit montant mis de côté est automatiquement transféré vers un portefeuille intelligent. Ton argent commence alors à travailler pour toi, sans effort, dans les bons secteurs, avec transparence.
-    </p>
-  </div>
+  <section class="hero">
+    <div class="inner" data-aos="fade-up">
+      <h1>Investis automatiquement. Simplement.</h1>
+      <p>
+        RainK arrondit tes achats, transfère les économies chaque semaine, et vise un rendement de 2 % par mois.
+      </p>
+      <a href="https://raink.onrender.com/app" class="btn">Commencer avec RainK</a>
+    </div>
+  </section>
 
-  <div class="section">
-    <h2>À propos de moi</h2>
+  <section class="features" data-aos="fade-up">
+    <ul>
+      <li>Transferts hebdomadaires automatisés</li>
+      <li>Portefeuille intelligent avec objectif de +2 %/mois</li>
+      <li>Suivi transparent des performances et des frais</li>
+    </ul>
+  </section>
+
+  <section class="pricing" data-aos="fade-up">
+    <h2>Tarifs</h2>
+    <table>
+      <tr><th>Frais de gestion</th><td>1 – 2 % / an sur encours</td></tr>
+      <tr><th>Commission sur gains</th><td>20 % uniquement sur les gains réalisés</td></tr>
+      <tr><th>Frais de dépôt/retrait</th><td>Aucun – transparence totale</td></tr>
+    </table>
+  </section>
+
+  <section class="about" data-aos="fade-up">
+    <h2>À propos du projet</h2>
     <p>
-      Je suis étudiant en ingénierie financière à l’EPFL, passionné par les marchés et la technologie. Mon objectif avec RainK est clair : rendre l’investissement en bourse simple, automatique et accessible à tous, même sans connaissances financières. Parce que l’investissement ne devrait pas être réservé à une élite, mais faire partie de notre quotidien.
+      Je suis étudiant en ingénierie financière à l’EPFL, passionné par la finance et la technologie. Avec RainK, je veux démocratiser l’investissement : des transferts automatiques, un pilotage simple, et un objectif réaliste de 2 % de rendement mensuel. L’idée est de transformer chaque petit montant en un vrai capital, sans effort.
     </p>
-  </div>
+  </section>
+
+  <!-- AOS Library -->
+  <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+  <script>
+    AOS.init({ duration: 800, once: true });
+  </script>
 </body>
 </html>
