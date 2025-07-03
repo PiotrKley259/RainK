@@ -35,6 +35,13 @@ def landing():
 def home():
     return render_template("index.html")
 
+@app.route("/dashboard")
+def dashboard():
+    if "user1" not in users:
+        return "Utilisateur non connecté", 401
+    return render_template("dashboard.html")
+
+
 @app.route("/connect", methods=["POST"])
 def connect_bank():
     identifier = "user1"
