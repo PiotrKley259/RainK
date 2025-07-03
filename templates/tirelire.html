@@ -3,54 +3,85 @@
 <head>
   <meta charset="UTF-8" />
   <title>Ma Tirelire 🐷</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
+      margin: 0;
       font-family: 'Inter', sans-serif;
-      background-color: #f9f9fb;
+      background-color: #ffffff;
+      color: #000;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      padding: 2rem;
       height: 100vh;
+      text-align: center;
     }
 
     .piggy {
       font-size: 5rem;
+      margin-bottom: 1rem;
     }
 
     .amount {
       font-size: 2rem;
-      margin: 1rem 0;
-      color: #007bff;
-    }
-
-    a, select, button {
-      font-size: 1rem;
-      margin-top: 1rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      color: #000;
     }
 
     form {
+      width: 100%;
+      max-width: 400px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
+      gap: 1rem;
     }
 
-    select, button {
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
+    label {
+      font-size: 1rem;
+      font-weight: 500;
+      text-align: left;
+    }
+
+    select {
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
       border: 1px solid #ccc;
+      border-radius: 0.75rem;
+      background-color: #f9f9f9;
     }
 
     button {
-      background-color: #007bff;
+      padding: 1rem;
+      font-size: 1rem;
+      font-weight: 600;
+      background-color: #000;
       color: white;
       border: none;
+      border-radius: 2rem;
       cursor: pointer;
+      transition: background 0.3s ease;
     }
 
     button:hover {
-      background-color: #0056b3;
+      background-color: #333;
+    }
+
+    @media (max-width: 480px) {
+      .amount {
+        font-size: 1.6rem;
+      }
+
+      button {
+        font-size: 0.95rem;
+        padding: 0.9rem;
+      }
     }
   </style>
 </head>
@@ -59,32 +90,37 @@
   <div class="amount" id="total">Chargement...</div>
 
   <form id="transferForm" action="/transfer-roundup" method="POST">
-    <label for="sourceAccount">Choisir un compte source :</label>
+    <label for="sourceAccount">Compte source</label>
     <select name="sourceAccount" id="sourceAccount" required>
-      <option value="">-- Sélectionnez un compte --</option>
+      <option value="">-- Sélectionner un compte --</option>
       <option value="account1">Compte courant</option>
       <option value="account2">Livret A</option>
       <option value="account3">Compte joint</option>
     </select>
+
     <input type="hidden" name="amount" id="amountInput" />
-    <button type="submit">💸 Transférer vers mon compte personnel</button>
+    <button type="submit">💸 Transférer vers mon compte</button>
   </form>
 
   <script>
     async function refreshRoundup() {
       document.getElementById("total").textContent = "Calcul en cours...";
-      const res = await fetch("/simulate-roundup");
-      const data = await res.json();
+      try {
+        const res = await fetch("/simulate-roundup");
+        const data = await res.json();
 
-      if (data.total !== undefined) {
-        document.getElementById("total").textContent = `💰 ${data.total.toFixed(2)} € économisés`;
-        document.getElementById("amountInput").value = data.total.toFixed(2);
-      } else {
-        document.getElementById("total").textContent = "Erreur : " + (data.message || "inconnue");
+        if (data.total !== undefined) {
+          const amount = parseFloat(data.total).toFixed(2);
+          document.getElementById("total").textContent = `💰 ${amount} € économisés`;
+          document.getElementById("amountInput").value = amount;
+        } else {
+          document.getElementById("total").textContent = "Erreur : " + (data.message || "inconnue");
+        }
+      } catch (e) {
+        document.getElementById("total").textContent = "Erreur réseau";
       }
     }
 
-    // Appel automatique au chargement
     refreshRoundup();
   </script>
 </body>

@@ -1,43 +1,78 @@
-<!-- templates/confirmation.html -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
   <title>Transfert confirmé</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
+      margin: 0;
+      padding: 0;
       font-family: 'Inter', sans-serif;
-      background-color: #f0f8ff;
+      background-color: #ffffff;
+      color: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
       text-align: center;
-      padding-top: 10vh;
+      padding: 2rem;
     }
 
     .msg {
-      font-size: 1.5rem;
-      color: #007bff;
+      font-size: 1.4rem;
+      font-weight: 500;
+      margin-bottom: 2.5rem;
+      line-height: 1.8;
+    }
+
+    .msg span {
+      display: block;
+      font-weight: 600;
+      margin-top: 0.5rem;
     }
 
     a {
-      display: inline-block;
-      margin-top: 2rem;
+      font-size: 1rem;
       text-decoration: none;
+      background-color: #000;
       color: #fff;
-      background-color: #007bff;
-      padding: 0.6rem 1.2rem;
-      border-radius: 8px;
+      padding: 0.9rem 1.8rem;
+      border-radius: 2rem;
+      transition: background 0.3s ease;
+      font-weight: 600;
     }
 
     a:hover {
-      background-color: #0056b3;
+      background-color: #333;
+    }
+
+    @media (max-width: 480px) {
+      .msg {
+        font-size: 1.1rem;
+      }
+
+      a {
+        font-size: 0.95rem;
+        padding: 0.8rem 1.5rem;
+      }
     }
   </style>
 </head>
 <body>
+
   <div class="msg">
-    ✅ {{ message }}<br/>
-    💶 Montant transféré : {{ amount }} €<br/>
-    📈 Nouveau solde d'investissement : {{ balance }} €
+    ✅ {{ message }}
+    <span>💶 Montant transféré : {{ amount }} €</span>
+    <span>📈 Nouveau solde d'investissement : {{ balance }} €</span>
   </div>
+
   <a href="/app">← Retour à la tirelire</a>
+
 </body>
 </html>

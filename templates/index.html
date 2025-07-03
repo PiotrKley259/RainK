@@ -2,94 +2,102 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Connexion bancaire intelligente</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <title>Connexion bancaire</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: 'Inter', sans-serif;
-      background: #f9f9fb;
-      color: #333;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      background-color: #ffffff;
+      color: #000;
       height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .container {
-      background: #fff;
-      padding: 2rem 3rem;
-      border-radius: 1.5rem;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+      background: #f9f9f9;
+      padding: 3rem;
+      border-radius: 1.75rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+      max-width: 420px;
+      width: 90%;
       text-align: center;
-      width: 100%;
-      max-width: 400px;
       animation: fadeIn 0.5s ease-in-out;
     }
 
     h1 {
-      font-size: 1.6rem;
-      margin-bottom: 0.5rem;
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
     }
 
     p {
-      color: #666;
-      font-size: 0.95rem;
-      margin-bottom: 2rem;
+      font-size: 1rem;
+      color: #444;
+      margin-bottom: 2.5rem;
     }
 
     button {
       font-size: 1rem;
-      padding: 0.8rem 1.2rem;
-      margin: 0.5rem 0;
+      padding: 1rem 1.5rem;
       border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.2s ease-in-out;
+      border-radius: 2rem;
       width: 100%;
+      cursor: pointer;
+      transition: background 0.25s ease;
+      font-weight: 600;
+      background-color: #000;
+      color: #fff;
     }
 
-    .btn-connect {
-      background-color: #007bff;
-      color: white;
-    }
-
-    .btn-connect:hover {
-      background-color: #0056b3;
-    }
-
-    .btn-reset {
-      background-color: #f44336;
-      color: white;
-    }
-
-    .btn-reset:hover {
-      background-color: #c62828;
+    button:hover {
+      background-color: #333;
     }
 
     #status {
-      margin-top: 1rem;
-      padding: 0.75rem;
-      background-color: #f1f5ff;
-      border-left: 4px solid #007bff;
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background-color: #f4f6f9;
+      border-left: 4px solid #000;
       border-radius: 0.5rem;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       display: none;
+      text-align: left;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
+      from { opacity: 0; transform: translateY(15px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 2rem;
+      }
+
+      h1 {
+        font-size: 1.6rem;
+      }
+
+      p {
+        font-size: 0.95rem;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Bienvenue 👋</h1>
-    <p>Connecte ta banque pour activer l'épargne intelligente</p>
 
-    <button class="btn-connect" onclick="startConnection()">🔗 Connecter ma banque</button>
-    <button class="btn-reset" onclick="resetCustomer()">🗑️ Réinitialiser le compte test</button>
+  <div class="container">
+    <h1>Connexion bancaire sécurisée</h1>
+    <p>Active ton épargne intelligente en connectant ta banque</p>
+
+    <button onclick="startConnection()">🔗 Connecter ma banque</button>
 
     <div id="status"></div>
   </div>
@@ -98,8 +106,8 @@
     function showStatus(message, isError = false) {
       const status = document.getElementById("status");
       status.style.display = "block";
-      status.style.borderLeftColor = isError ? "red" : "#007BFF";
-      status.style.backgroundColor = isError ? "#ffecec" : "#f1f5ff";
+      status.style.borderLeftColor = isError ? "#f44336" : "#000";
+      status.style.backgroundColor = isError ? "#ffecec" : "#f4f6f9";
       status.textContent = message;
     }
 
@@ -115,24 +123,7 @@
           showStatus("❌ Erreur : " + JSON.stringify(data), true);
         }
       } catch (err) {
-        showStatus("❌ Une erreur est survenue : " + err, true);
-      }
-    }
-
-    async function resetCustomer() {
-      if (!confirm("❗ Cette action supprimera le client Salt Edge 'user1'. Continuer ?")) return;
-
-      showStatus("🗑️ Suppression du client...");
-      try {
-        const res = await fetch("/reset", { method: "POST" });
-        const data = await res.json();
-        if (data.message) {
-          showStatus("✅ " + data.message);
-        } else {
-          showStatus("❌ " + data.error, true);
-        }
-      } catch (e) {
-        showStatus("❌ Erreur réseau : " + e, true);
+        showStatus("❌ Une erreur est survenue : " + err.message, true);
       }
     }
   </script>
