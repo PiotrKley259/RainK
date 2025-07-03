@@ -23,6 +23,11 @@ def get_headers():
     }
 
 @app.route("/")
+def landing():
+    return render_template("landing.html")
+
+
+@app.route("/app")
 def home():
     return render_template("index.html")
 
