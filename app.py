@@ -126,7 +126,8 @@ def upload():
         investment_accounts[email] += total
         users_data[email]["last_import"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        return redirect(url_for("dashboard"))
+        # Rediriger vers la page de virement après le premier import
+        return redirect(url_for("virement"))
 
     return render_template("upload.html")
 
@@ -163,15 +164,53 @@ def virement():
     if not email or email not in users_data:
         return redirect(url_for("login"))
 
-    roundups = users_data[email].get("roundups", {})
+    user = users_data[email]
+    roundups = user.get("roundups", {})
+    
+    # Debug: Afficher les données disponibles
+    print(f"Email: {email}")
+    print(f"Roundups disponibles: {roundups}")
+    print(f"Montant total investi: {user.get('invested', 0)}")
+    
     if not roundups:
-        return "Aucun arrondi disponible."
+        # Créer des données par défaut pour le template
+        return render_template("virement.html", 
+                             month="Aucun mois disponible", 
+                             amount=0.00, 
+                             iban="CH12 3456 7890 1234 5678 9",
+                             error="Aucun arrondi disponible. Veuillez d'abord importer vos transactions.")
 
     # On prend le dernier mois pour afficher
-    last_month = sorted(roundups.keys())[-1]
-    amount = roundups[last_month]
+    try:
+        last_month = sorted(roundups.keys())[-1]
+        amount = roundups[last_month]
+        
+        print(f"Dernier mois: {last_month}, Montant: {amount}")
+        
+        return render_template("virement.html", 
+                             month=last_month, 
+                             amount=amount, 
+                             iban="CH12 3456 7890 1234 5678 9")
+    except Exception as e:
+        print(f"Erreur lors du traitement du virement: {e}")
+        return render_template("virement.html", 
+                             month="Erreur", 
+                             amount=0.00, 
+                             iban="CH12 3456 7890 1234 5678 9",
+                             error=f"Erreur lors du calcul des arrondis: {str(e)}")
 
-    return render_template("virement.html", month=last_month, amount=amount, iban="CH12 3456 7890 1234 5678 9")
+@app.route("/transfer", methods=["POST"])
+def transfer():
+    """Route pour traiter la confirmation du virement"""
+    email = session.get("user_email")
+    if not email or email not in users_data:
+        return redirect(url_for("login"))
+    
+    # Marquer le virement comme effectué (optionnel)
+    # Vous pourriez ajouter ici une logique pour traquer les virements effectués
+    
+    # Après confirmation du virement, rediriger vers le dashboard
+    return redirect(url_for("dashboard"))
 
 
 if __name__ == "__main__":
