@@ -78,28 +78,47 @@ def upload():
 
         monthly_roundups = defaultdict(float)
         today = datetime.date.today()
-        previous_month = (today.replace(day=1) - datetime.timedelta(days=1)).strftime("%Y-%m")
+        
+        # DEBUG: Ajout de logs pour comprendre le problème
+        print(f"Date d'aujourd'hui: {today}")
+        
+        transactions_processed = 0
+        total_roundups = 0
 
         for row in reader:
             try:
                 amount = float(row.get("Amount", 0))
                 date_str = row.get("Completed Date", "")
+                transaction_type = row.get("Type", "")
+                
+                print(f"Transaction: {transaction_type}, Amount: {amount}, Date: {date_str}")
+                
                 if not date_str or amount >= 0:
+                    print(f"  -> Ignorée (montant positif ou pas de date)")
                     continue
 
-                date = datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
+                # Parsing de la date (format avec heure)
+                date = datetime.datetime.strptime(date_str[:10], "%Y-%m-%d").date()
                 key = date.strftime("%Y-%m")
-
-                if key != previous_month:
-                    continue  # ne garder que les transactions du mois précédent
-
                 
-                roundup = round(math.ceil(-amount) - (-amount), 2)
-                if 0 < roundup < 1:
-                    monthly_roundups[key] += roundup
+                print(f"  -> Date parsed: {date}, Mois: {key}")
 
-            except Exception:
+                # Calculer l'arrondi
+                roundup = round(math.ceil(-amount) - (-amount), 2)
+                print(f"  -> Arrondi calculé: {roundup}")
+                
+                # Ajouter TOUS les arrondis (même 0) pour debug
+                monthly_roundups[key] += roundup
+                transactions_processed += 1
+                total_roundups += roundup
+
+            except Exception as e:
+                print(f"Erreur lors du traitement: {e}")
                 continue
+
+        print(f"Transactions traitées: {transactions_processed}")
+        print(f"Total des arrondis: {total_roundups}")
+        print(f"Arrondis par mois: {dict(monthly_roundups)}")
 
         total = sum(monthly_roundups.values())
         users_data[email]["roundups"] = dict(monthly_roundups)
@@ -157,4 +176,4 @@ def virement():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port, debug=True)
