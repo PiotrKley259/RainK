@@ -1,144 +1,180 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Virement manuel – RainK</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --color-bg: #0f0f23;
-      --color-text: #ffffff;
-      --color-muted: #94a3b8;
-      --color-border: rgba(255, 255, 255, 0.1);
-      --color-card: rgba(255, 255, 255, 0.05);
-      --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--color-bg);
-      color: var(--color-text);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 2rem;
-      position: relative;
-    }
-
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background:
-        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
-        radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
-      z-index: -1;
-      animation: float 20s ease-in-out infinite;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-20px) rotate(180deg); }
-    }
-
-    .card {
-      background: var(--color-card);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--color-border);
-      border-radius: 20px;
-      padding: 2.5rem;
-      max-width: 500px;
-      width: 100%;
-      text-align: left;
-    }
-
-    h1 {
-      font-size: 1.8rem;
-      font-weight: 700;
-      margin-bottom: 1.5rem;
-      background: var(--gradient-primary);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    p {
-      margin: 0.8rem 0;
-      font-size: 1rem;
-      color: var(--color-text);
-    }
-
-    p strong {
-      color: var(--color-muted);
-      font-weight: 600;
-    }
-
-    .btn {
-      margin-top: 2rem;
-      display: inline-block;
-      padding: 12px 24px;
-      font-size: 1rem;
-      font-weight: 600;
-      color: #fff;
-      background: var(--gradient-primary);
-      border: none;
-      border-radius: 50px;
-      text-decoration: none;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-      transition: left 0.5s ease;
-    }
-
-    .btn:hover::before {
-      left: 100%;
-    }
-
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
-    }
-
-    form {
-      margin-top: 1.5rem;
-      text-align: center;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Virement manuel – RainK</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+ :root {
+ --color-bg: #0f0f23;
+ --color-text: #ffffff;
+ --color-muted: #94a3b8;
+ --color-border: rgba(255, 255, 255, 0.1);
+ --color-card: rgba(255, 255, 255, 0.05);
+ --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+ --color-error: #ef4444;
+ }
+ * {
+ box-sizing: border-box;
+ margin: 0;
+ padding: 0;
+ }
+ body {
+ font-family: 'Inter', sans-serif;
+ background: var(--color-bg);
+ color: var(--color-text);
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ min-height: 100vh;
+ padding: 2rem;
+ position: relative;
+ }
+ body::before {
+ content: '';
+ position: fixed;
+ top: 0;
+ left: 0;
+ width: 100%;
+ height: 100%;
+ background:
+ radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+ radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+ radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+ z-index: -1;
+ animation: float 20s ease-in-out infinite;
+ }
+ @keyframes float {
+ 0%, 100% { transform: translateY(0px) rotate(0deg); }
+ 50% { transform: translateY(-20px) rotate(180deg); }
+ }
+ .card {
+ background: var(--color-card);
+ backdrop-filter: blur(20px);
+ border: 1px solid var(--color-border);
+ border-radius: 20px;
+ padding: 2.5rem;
+ max-width: 500px;
+ width: 100%;
+ text-align: left;
+ }
+ h1 {
+ font-size: 1.8rem;
+ font-weight: 700;
+ margin-bottom: 1.5rem;
+ background: var(--gradient-primary);
+ -webkit-background-clip: text;
+ -webkit-text-fill-color: transparent;
+ background-clip: text;
+ }
+ p {
+ margin: 0.8rem 0;
+ font-size: 1rem;
+ color: var(--color-text);
+ }
+ p strong {
+ color: var(--color-muted);
+ font-weight: 600;
+ }
+ .error-message {
+ background: rgba(239, 68, 68, 0.1);
+ border: 1px solid rgba(239, 68, 68, 0.3);
+ border-radius: 10px;
+ padding: 1rem;
+ margin: 1rem 0;
+ color: var(--color-error);
+ }
+ .btn {
+ margin-top: 2rem;
+ display: inline-block;
+ padding: 12px 24px;
+ font-size: 1rem;
+ font-weight: 600;
+ color: #fff;
+ background: var(--gradient-primary);
+ border: none;
+ border-radius: 50px;
+ text-decoration: none;
+ cursor: pointer;
+ transition: all 0.3s ease;
+ position: relative;
+ overflow: hidden;
+ }
+ .btn::before {
+ content: '';
+ position: absolute;
+ top: 0;
+ left: -100%;
+ width: 100%;
+ height: 100%;
+ background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+ transition: left 0.5s ease;
+ }
+ .btn:hover::before {
+ left: 100%;
+ }
+ .btn:hover {
+ transform: translateY(-2px);
+ box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+ }
+ .btn-secondary {
+ background: rgba(255, 255, 255, 0.1);
+ margin-right: 1rem;
+ }
+ .btn-secondary:hover {
+ background: rgba(255, 255, 255, 0.2);
+ box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+ }
+ form {
+ margin-top: 1.5rem;
+ text-align: center;
+ }
+ .amount-display {
+ font-size: 1.5rem;
+ font-weight: 700;
+ color: #10b981;
+ margin: 1rem 0;
+ }
+</style>
 </head>
 <body>
-  <div class="card">
-    <h1>Virement pour {{ month }}</h1>
-    <p><strong>Montant à transférer :</strong> {{ amount }} CHF</p>
+<div class="card">
+{% if error %}
+    <h1>⚠️ Erreur</h1>
+    <div class="error-message">
+        {{ error }}
+    </div>
+    <form method="GET" action="/dashboard">
+        <button class="btn btn-secondary" type="submit">Retour au tableau de bord</button>
+    </form>
+    <form method="GET" action="/upload">
+        <button class="btn" type="submit">Importer des transactions</button>
+    </form>
+{% else %}
+    <h1>✅ Import réussi ! Virement pour {{ month }}</h1>
+    <p style="margin-bottom: 1.5rem; color: var(--color-muted);">
+        Vos transactions ont été analysées. Voici le montant de vos arrondis à investir :
+    </p>
+    <p><strong>Montant à transférer :</strong></p>
+    <div class="amount-display">{{ "%.2f"|format(amount) }} CHF</div>
     <p><strong>IBAN :</strong> {{ iban }}</p>
     <p><strong>Bénéficiaire :</strong> RainK Invest</p>
     <p><strong>Motif :</strong> Arrondis {{ month }}</p>
-
+    
+    <div style="margin: 1.5rem 0; padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 10px; border: 1px solid rgba(16, 185, 129, 0.3);">
+        <p style="color: #10b981; font-size: 0.9rem;">
+            💡 <strong>Astuce :</strong> Effectuez ce virement maintenant pour commencer à investir vos arrondis automatiquement !
+        </p>
+    </div>
+    
     <form method="POST" action="/transfer">
-      <button class="btn" type="submit">J’ai effectué le virement</button>
+        <button class="btn" type="submit">J'ai effectué le virement</button>
     </form>
-  </div>
+    <form method="GET" action="/dashboard">
+        <button class="btn btn-secondary" type="submit">Passer pour le moment</button>
+    </form>
+{% endif %}
+</div>
 </body>
 </html>
