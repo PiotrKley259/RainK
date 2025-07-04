@@ -137,6 +137,23 @@ def admin_users():
     # Sécurisation à ajouter plus tard si nécessaire
     return render_template("admin_users.html", users=users_data)
 
+@app.route("/virement")
+def virement():
+    email = session.get("user_email")
+    if not email or email not in users_data:
+        return redirect(url_for("login"))
+
+    roundups = users_data[email].get("roundups", {})
+    if not roundups:
+        return "Aucun arrondi disponible."
+
+    # On prend le dernier mois pour afficher
+    last_month = sorted(roundups.keys())[-1]
+    amount = roundups[last_month]
+
+    return render_template("virement.html", month=last_month, amount=amount, iban="CH12 3456 7890 1234 5678 9")
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
