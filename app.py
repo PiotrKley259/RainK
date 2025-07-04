@@ -82,9 +82,9 @@ def upload():
 
         for row in reader:
             try:
-                amount = abs(float(row.get("Amount", 0)))
+                amount = float(row.get("Amount", 0))
                 date_str = row.get("Completed Date", "")
-                if not date_str or amount == 0:
+                if not date_str or amount >= 0:
                     continue
 
                 date = datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
@@ -93,8 +93,9 @@ def upload():
                 if key != previous_month:
                     continue  # ne garder que les transactions du mois précédent
 
-                if amount >= 1:
-                    roundup = round(math.ceil(amount) - amount, 2)
+                
+                roundup = round(math.ceil(-amount) - (-amount), 2)
+                if 0 < roundup < 1:
                     monthly_roundups[key] += roundup
 
             except Exception:
