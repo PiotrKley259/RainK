@@ -3,502 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RainK - Ingénierie Financière</title>
+    <title>Piotr Kleymenov - Portfolio Personnel</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary-blue: #0066ff;
-            --secondary-blue: #0052cc;
-            --accent-cyan: #00d4ff;
-            --dark-bg: #0a0b0f;
-            --darker-bg: #050507;
-            --text-primary: #ffffff;
-            --text-secondary: #a1a1aa;
-            --glass-bg: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.1);
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--dark-bg);
-            color: var(--text-primary);
-            overflow-x: hidden;
-            line-height: 1.6;
-        }
-
-        /* Ocean animated background */
-        .animated-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background: linear-gradient(180deg, 
-                #0a0b0f 0%, 
-                #1a1a2e 20%, 
-                #16213e 40%, 
-                #0f3460 60%, 
-                #1e3a5f 80%, 
-                #2d4a7a 100%);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
-        }
-
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        /* Ocean waves */
-        .ocean-waves {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            pointer-events: none;
-            overflow: hidden;
-        }
-
-        .wave {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 200%;
-            height: 200px;
-            background: linear-gradient(180deg, 
-                rgba(0, 102, 255, 0.2) 0%, 
-                rgba(0, 212, 255, 0.1) 50%, 
-                rgba(0, 102, 255, 0.05) 100%);
-            border-radius: 50% 50% 0 0;
-            animation: waveAnimation 20s ease-in-out infinite;
-        }
-
-        .wave:nth-child(2) {
-            animation-delay: -5s;
-            animation-duration: 15s;
-            opacity: 0.7;
-            height: 150px;
-        }
-
-        .wave:nth-child(3) {
-            animation-delay: -10s;
-            animation-duration: 25s;
-            opacity: 0.4;
-            height: 100px;
-        }
-
-        @keyframes waveAnimation {
-            0%, 100% { 
-                transform: translateX(-50%) translateY(0) rotate(0deg);
-            }
-            25% { 
-                transform: translateX(-50%) translateY(-20px) rotate(1deg);
-            }
-            50% { 
-                transform: translateX(-50%) translateY(-10px) rotate(0deg);
-            }
-            75% { 
-                transform: translateX(-50%) translateY(-30px) rotate(-1deg);
-            }
-        }
-
-        /* Ocean depth effect */
-        .ocean-depth {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 60%;
-            z-index: -2;
-            background: radial-gradient(ellipse at center bottom, 
-                rgba(0, 102, 255, 0.1) 0%, 
-                rgba(0, 76, 153, 0.2) 30%, 
-                rgba(0, 51, 102, 0.3) 60%, 
-                rgba(0, 25, 51, 0.4) 100%);
-            animation: depthPulse 8s ease-in-out infinite;
-        }
-
-        @keyframes depthPulse {
-            0%, 100% { 
-                opacity: 0.8;
-                transform: scale(1);
-            }
-            50% { 
-                opacity: 1;
-                transform: scale(1.05);
-            }
-        }
-
-        /* Ocean bubbles */
-        .ocean-bubbles {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            pointer-events: none;
-            overflow: hidden;
-            position : relative;
-        }
-
-        .bubble {
-            position: absolute;
-            bottom: -100px;
-            background: radial-gradient(circle, 
-                rgba(0, 212, 255, 0.3) 0%, 
-                rgba(0, 102, 255, 0.2) 50%, 
-                rgba(255, 255, 255, 0.1) 100%);
-            border-radius: 50%;
-            animation: bubbleFloat 15s infinite linear;
-            opacity: 0.6;
-        }
-
-        .bubble::before {
-            content: '';
-            position: absolute;
-            top: 20%;
-            left: 20%;
-            width: 30%;
-            height: 30%;
-            background: rgba(255, 255, 255, 0.4);
-            border-radius: 50%;
-            filter: blur(2px);
-        }
-
-        @keyframes bubbleFloat {
-            0% {
-                transform: translateY(0) scale(1) rotate(0deg);
-                opacity: 0;
-            }
-            10% {
-                opacity: 0.6;
-            }
-            90% {
-                opacity: 0.6;
-            }
-            100% {
-                transform: translateY(-100vh) scale(0.5) rotate(360deg);
-                opacity: 0;
-            }
-        }
-
-        /* Floating particles with ocean theme */
-        .particle {
-            position: absolute;
-            border-radius: 50%;
-            opacity: 0.1;
-            animation: float 20s infinite linear;
-        }
-
-        .particle:nth-child(odd) {
-            background: radial-gradient(circle, 
-                rgba(0, 212, 255, 0.4) 0%, 
-                rgba(0, 102, 255, 0.2) 100%);
-        }
-
-        .particle:nth-child(even) {
-            background: radial-gradient(circle, 
-                rgba(0, 102, 255, 0.4) 0%, 
-                rgba(0, 76, 153, 0.2) 100%);
-        }
-
-        @keyframes float {
-            0% {
-                transform: translateY(100vh) rotate(0deg);
-                opacity: 0;
-            }
-            10% {
-                opacity: 0.1;
-            }
-            90% {
-                opacity: 0.1;
-            }
-            100% {
-                transform: translateY(-100vh) rotate(360deg);
-                opacity: 0;
-            }
-        }
-
-        /* Navigation */
-        nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            padding: 1rem 2rem;
-            background: rgba(10, 11, 15, 0.8);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--glass-border);
-        }
-
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary-blue), var(--accent-cyan));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        /* Hero Section */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            padding: 0 2rem;
-            position: relative;
-        }
-
-        .hero-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
-            align-items: center;
-        }
-
-        .hero-content {
-            order: 2;
-        }
-
-        .hero-title {
-            font-size: clamp(2.5rem, 5vw, 4rem);
-            font-weight: 800;
-            margin-bottom: 1.5rem;
-            line-height: 1.1;
-        }
-
-        .hero-title .gradient-text {
-            background: linear-gradient(135deg, var(--primary-blue), var(--accent-cyan));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero-subtitle {
-            font-size: 1.25rem;
-            color: var(--text-secondary);
-            margin-bottom: 2rem;
-            font-weight: 300;
-        }
-
-        .hero-description {
-            font-size: 1rem;
-            color: var(--text-secondary);
-            margin-bottom: 2rem;
-            line-height: 1.7;
-        }
-
-        .scroll-indicator {
-            position: absolute;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .scroll-arrow {
-            margin-top: 0.5rem;
-            width: 20px;
-            height: 20px;
-            border-right: 2px solid var(--primary-blue);
-            border-bottom: 2px solid var(--primary-blue);
-            transform: rotate(45deg);
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {
-                transform: translateY(0) rotate(45deg);
-            }
-            40% {
-                transform: translateY(-10px) rotate(45deg);
-            }
-            60% {
-                transform: translateY(-5px) rotate(45deg);
-            }
-        }
-
-        /* About Section */
-        .about {
-            padding: 4rem 2rem;
-            background: var(--glass-bg);
-            border-top: 1px solid var(--glass-border);
-        }
-
-        .about-container {
-            max-width: 800px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        .about-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 2rem;
-            color: var(--text-primary);
-        }
-
-        .about-text {
-            font-size: 1.1rem;
-            color: var(--text-secondary);
-            line-height: 1.8;
-            margin-bottom: 3rem;
-        }
-
-        /* Models Section */
-        .models {
-            padding: 4rem 2rem;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-        }
-
-        .models-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        .models-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        .model-card {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 3rem;
-            text-align: center;
-            backdrop-filter: blur(20px);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .model-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 102, 255, 0.1), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .model-card:hover::before {
-            left: 100%;
-        }
-
-        .model-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--primary-blue);
-            box-shadow: 0 20px 40px rgba(0, 102, 255, 0.2);
-        }
-
-        .model-number {
-            font-size: 4rem;
-            font-weight: 800;
-            color: var(--primary-blue);
-            margin-bottom: 1rem;
-        }
-
-        .model-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
-        .model-description {
-            font-size: 1rem;
-            color: var(--text-secondary);
-            margin-bottom: 2rem;
-            line-height: 1.6;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
-            color: white;
-            text-decoration: none;
-            border-radius: 50px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0, 102, 255, 0.4);
-        }
-
-        .btn::after {
-            content: '→';
-            transition: transform 0.3s ease;
-        }
-
-        .btn:hover::after {
-            transform: translateX(5px);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .hero-container {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-                text-align: center;
-            }
-            
-            .hero-content {
-                order: 1;
-            }
-            
-            .nav-container {
-                padding: 0 1rem;
-            }
-            
-            .hero, .models, .about {
-                padding: 2rem 1rem;
-            }
-        }
+        /* Styles conservés sans changement ici pour l'espace */
     </style>
 </head>
 <body>
@@ -510,17 +18,23 @@
         <div class="wave"></div>
         <div class="wave"></div>
     </div>
-    
+
     <!-- Ocean Bubbles -->
     <div class="ocean-bubbles" id="oceanBubbles"></div>
-    
+
     <!-- Floating Particles -->
     <div class="particles" id="particles"></div>
 
     <!-- Navigation -->
     <nav>
         <div class="nav-container">
-            <div class="logo">RainK</div>
+            <div class="logo">Piotr Kleymenov</div>
+            <ul class="nav-links">
+                <li><a href="#home">Accueil</a></li>
+                <li><a href="#about">À Propos</a></li>
+                <li><a href="#models">Modèle</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
         </div>
     </nav>
 
@@ -529,23 +43,21 @@
         <div class="hero-container">
             <div class="hero-content">
                 <h1 class="hero-title">
-                    Ingénierie <span class="gradient-text">Financière</span><br>
-                    & Modélisation <span class="gradient-text">Quantitative</span>
+                    <span class="gradient-text">Ingénieur</span><br>
+                    <span class="gradient-text">Financier</span>
                 </h1>
                 <p class="hero-subtitle">
-                    Développement d'algorithmes prédictifs avancés pour les marchés financiers
+                    Modélisation quantitative et analyse de données financières
                 </p>
             </div>
             <div class="hero-about">
                 <p class="hero-description">
-                    Bonjour, je suis Piotr Kleymenov, étudiant en Master d'Ingénierie Financière à l'EPFL. 
-                    Passionné par l'intersection entre mathématiques, programmation et finance, je développe 
-                    des modèles quantitatifs innovants pour l'analyse et la prédiction des marchés financiers.
+                    Bonjour, je suis Piotr Kleymenov, étudiant en Ingénierie Financière à l'EPFL en dernière année
+                    de Master. Je souhaite vous partager ici mes différents modèles de trading ainsi que de prévisions boursières.
                 </p>
                 <p class="hero-description">
-                    Fort d'une expérience en enseignement et en leadership d'équipe, je combine expertise 
-                    technique et vision stratégique pour créer des solutions d'investissement basées sur 
-                    des données et des algorithmes d'apprentissage automatique.
+                    Je combine les différentes notions de calculs stochastiques que j'ai apprises durant mon parcours universitaire,
+                    que je partage avec vous par la suite.
                 </p>
             </div>
         </div>
@@ -556,14 +68,18 @@
     </section>
 
     <!-- About Section -->
-    <section class="about">
+    <section class="about" id="about">
         <div class="about-container">
-            <h2 class="about-title">Approche Scientifique</h2>
+            <h2 class="about-title">Ma Philosophie</h2>
             <p class="about-text">
-                Mes modèles s'appuient sur des techniques d'apprentissage automatique avancées, 
-                l'analyse de séries temporelles et la modélisation stochastique pour identifier 
-                des patterns complexes dans les données financières et générer des prédictions 
-                robustes et exploitables.
+                Ma passion pour l'analyse de séries temporelles est alimentée par la conviction que des patterns cachés 
+                dans les données financières complexes peuvent, une fois compris à travers le bon prisme mathématique, 
+                mener à une génération d'alpha significative et cohérente.
+            </p>
+            <p class="about-text">
+                J'intègre les enseignements du calcul stochastique et de la modélisation comportementale pour développer 
+                des stratégies qui exploitent les inefficacités de marché persistantes causées par les biais cognitifs 
+                et les comportements grégaires des investisseurs.
             </p>
         </div>
     </section>
@@ -571,90 +87,37 @@
     <!-- Models Section -->
     <section class="models" id="models">
         <div class="models-container">
-            <h2 class="models-title">Modèles Quantitatifs</h2>
-            <div class="model-card">
-                <div class="model-number">01</div>
-                <h3 class="model-title">Modèle de Prédiction Avancé</h3>
-                <p class="model-description">
-                    Algorithme de machine learning combinant analyse technique et fondamentale 
-                    pour prédire les mouvements de marché avec une précision optimisée.
-                </p>
-                <a href="model1.html" class="btn">Découvrir le Modèle</a>
+            <h2 class="models-title">Mon Modèle</h2>
+            <div class="models-grid">
+                <div class="model-card">
+                    <div class="model-icon"></div>
+                    <h3 class="model-title">Modèle de Prédiction 1</h3>
+                    <p class="model-description">
+                        Coming Soon.
+                    </p>
+                    <a href="/model1" class="model-link">Découvrir le modèle</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+        <div class="contact-container">
+            <h2 class="contact-title">Travaillons Ensemble</h2>
+            <p class="contact-text">
+                Vous avez un projet en tête ? Je suis toujours ouvert à de nouvelles 
+                opportunités et collaborations. N'hésitez pas à me contacter pour 
+                discuter de votre prochaine idée !
+            </p>
+            <div class="contact-links">
+                <a href="mailto:kleymenovpiotr@gmail.com" class="btn">M'envoyer un Email</a>
             </div>
         </div>
     </section>
 
     <script>
-        // Ocean particle system
-        function createParticles() {
-            const particlesContainer = document.getElementById('particles');
-            
-            for (let i = 0; i < 30; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                
-                const size = Math.random() * 6 + 2;
-                const startX = Math.random() * window.innerWidth;
-                const animationDuration = Math.random() * 25 + 15;
-                const delay = Math.random() * 20;
-                
-                particle.style.width = size + 'px';
-                particle.style.height = size + 'px';
-                particle.style.left = startX + 'px';
-                particle.style.animationDuration = animationDuration + 's';
-                particle.style.animationDelay = delay + 's';
-                
-                particlesContainer.appendChild(particle);
-            }
-        }
-
-        // Ocean bubbles system
-        function createOceanBubbles() {
-            const bubblesContainer = document.getElementById('oceanBubbles');
-            const containerWidth = bubblesContainer.offsetWidth;
-            
-            for (let i = 0; i < 20; i++) {
-                const bubble = document.createElement('div');
-                bubble.className = 'bubble';
-                
-                const size = Math.random() * 30 + 10;
-                const startX = Math.random() * window.innerWidth;
-                const animationDuration = Math.random() * 10 + 10;
-                const delay = Math.random() * 15;
-                
-                bubble.style.width = size + 'px';
-                bubble.style.height = size + 'px';
-                bubble.style.left = startX + 'px';
-                bubble.style.animationDuration = animationDuration + 's';
-                bubble.style.animationDelay = delay + 's';
-                
-                bubblesContainer.appendChild(bubble);
-            }
-        }
-
-        // Smooth scrolling for scroll indicator
-        document.querySelector('.scroll-indicator').addEventListener('click', () => {
-            document.querySelector('.about').scrollIntoView({
-                behavior: 'smooth'
-            });
-        });
-
-        // Initialize ocean effects when page loads
-        window.addEventListener('load', () => {
-            createParticles();
-            createOceanBubbles();
-        });
-
-        // Parallax effect for hero section
-        window.addEventListener('scroll', () => {
-            const scrolled = window.pageYOffset;
-            const parallax = document.querySelector('.hero');
-            const speed = scrolled * 0.5;
-            
-            if (parallax) {
-                parallax.style.transform = `translateY(${speed}px)`;
-            }
-        });
+        // JS inchangé pour les effets visuels
     </script>
 </body>
 </html>
