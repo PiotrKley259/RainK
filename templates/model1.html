@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modèle 1 – RainK</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet" />
+
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0f;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    .mountain-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -10;
+    }
+
+    .mountain-image {
+      position: absolute;
+      inset: 0;
+      background: url('https://images.unsplash.com/photo-1601758123927-196dbe6400ee?auto=format&fit=crop&w=1920&q=80') no-repeat center center/cover;
+      animation: zoomPan 60s ease-in-out infinite;
+      z-index: -4;
+    }
+
+    .stars, .gradient-overlay {
+      position: absolute;
+      inset: 0;
+    }
+
+    .stars {
+      background: radial-gradient(1px 1px at 10% 20%, #fff, transparent),
+                  radial-gradient(1px 1px at 40% 70%, #aaa, transparent),
+                  radial-gradient(1px 1px at 80% 30%, #666, transparent);
+      background-size: 400px 200px;
+      animation: starsDrift 180s linear infinite;
+      z-index: -3;
+    }
+
+    .gradient-overlay {
+      background: linear-gradient(to bottom, rgba(10,10,15,0.4) 0%, rgba(10,10,15,0.95) 90%);
+      z-index: -2;
+    }
+
+    @keyframes zoomPan {
+      0% { transform: scale(1) translate(0, 0); }
+      50% { transform: scale(1.08) translateY(-10px); }
+      100% { transform: scale(1) translate(0, 0); }
+    }
+
+    @keyframes starsDrift {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(-50px, -100px); }
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: -5;
+    }
+
+    .centered {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0 20px;
+    }
+
+    h1 {
+      font-size: clamp(3rem, 6vw, 5rem);
+      font-weight: 900;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      font-size: 1.25rem;
+      color: #cbd5e1;
+      margin-bottom: 2rem;
+    }
+
+    .btn-back {
+      padding: 12px 28px;
+      font-weight: 600;
+      font-size: 1rem;
+      border-radius: 30px;
+      border: 1px solid rgba(255,255,255,0.3);
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+
+    .btn-back:hover {
+      transform: translateY(-2px);
+      background-color: rgba(255,255,255,0.05);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Layers -->
+  <div class="mountain-bg">
+    <canvas id="snow-canvas"></canvas>
+    <div class="mountain-image"></div>
+    <div class="stars"></div>
+    <div class="gradient-overlay"></div>
+  </div>
+
+  <!-- Content -->
+  <div class="centered">
+    <h1>Modèle 1</h1>
+    <p>Ce modèle prédictif arrive très bientôt.<br>Restez connectés !</p>
+    <a href="/" class="btn-back">← Retour à l'accueil</a>
+  </div>
+
+  <!-- Snow Script -->
+  <script>
+    const canvas = document.getElementById('snow-canvas');
+    let width, height, snowflakes = [];
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      initSnowflakes();
+    }
+
+    function initSnowflakes(count = 150) {
+      snowflakes = Array.from({ length: count }).map(() => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        r: Math.random() * 3 + 1,
+        d: Math.random() * 1 + 0.5
+      }));
+    }
+
+    function drawSnowflakes() {
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = 'white';
+      ctx.beginPath();
+      for (let flake of snowflakes) {
+        ctx.moveTo(flake.x, flake.y);
+        ctx.arc(flake.x, flake.y, flake.r, 0, Math.PI * 2);
+      }
+      ctx.fill();
+      updateSnowflakes();
+    }
+
+    function updateSnowflakes() {
+      for (let flake of snowflakes) {
+        flake.y += flake.d;
+        if (flake.y > height) {
+          flake.y = 0;
+          flake.x = Math.random() * width;
+        }
+      }
+    }
+
+    function animateSnow() {
+      drawSnowflakes();
+      requestAnimationFrame(animateSnow);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    animateSnow();
+  </script>
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RainK – Anticipez la Bourse avec l’IA</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet" />
+
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0f;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .mountain-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      z-index: -10;
+    }
+
+    .mountain-image {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: url('https://images.unsplash.com/photo-1601758123927-196dbe6400ee?auto=format&fit=crop&w=1920&q=80') no-repeat center center/cover;
+      animation: zoomPan 60s ease-in-out infinite;
+      z-index: -4;
+    }
+
+    .stars, .gradient-overlay {
+      position: absolute;
+      inset: 0;
+    }
+
+    .stars {
+      background: radial-gradient(1px 1px at 10% 20%, #fff, transparent),
+                  radial-gradient(1px 1px at 40% 70%, #aaa, transparent),
+                  radial-gradient(1px 1px at 80% 30%, #666, transparent);
+      background-size: 400px 200px;
+      animation: starsDrift 180s linear infinite;
+      z-index: -3;
+    }
+
+    .gradient-overlay {
+      background: linear-gradient(to bottom, rgba(10,10,15,0.4) 0%, rgba(10,10,15,0.95) 90%);
+      z-index: -2;
+    }
+
+    @keyframes zoomPan {
+      0% { transform: scale(1) translate(0, 0); }
+      50% { transform: scale(1.08) translateY(-10px); }
+      100% { transform: scale(1) translate(0, 0); }
+    }
+
+    @keyframes starsDrift {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(-50px, -100px); }
+    }
+
+    /* Hero */
+    .hero {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 0 20px;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: clamp(3rem, 7vw, 5rem);
+      font-weight: 900;
+      line-height: 1.1;
+      max-width: 900px;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero p {
+      font-size: 1.25rem;
+      color: #cbd5e1;
+      max-width: 680px;
+      margin-bottom: 2rem;
+      opacity: 0;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      opacity: 0;
+    }
+
+    .btn {
+      padding: 14px 32px;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #1e40af);
+      color: white;
+      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(59, 130, 246, 0.6);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.3);
+      color: #fff;
+    }
+
+    /* Sections */
+    .section {
+      padding: 100px 20px;
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .section h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .section p {
+      font-size: 1.125rem;
+      color: #ccc;
+      line-height: 1.6;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: -5;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Layers -->
+  <div class="mountain-bg">
+    <canvas id="snow-canvas"></canvas>
+    <div class="mountain-image"></div>
+    <div class="stars"></div>
+    <div class="gradient-overlay"></div>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1>Vos modèles boursiers intelligents<br> alimentés par la puissance de l'IA</h1>
+    <p>RainK est un laboratoire personnel où je teste, améliore et expose des modèles prédictifs conçus pour anticiper les mouvements de marché.</p>
+    <div class="hero-buttons">
+      <a href="/model1" class="btn btn-primary">Voir Modèle 1</a>
+      <a href="#apropos" class="btn btn-outline">En savoir plus</a>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section class="section" id="apropos">
+    <h2>Pourquoi ce projet ?</h2>
+    <p>RainK est né de ma passion pour la finance, les données et l'intelligence artificielle. Je voulais un espace pour montrer mes expériences de prédiction boursière, partager mes recherches et peut-être aider d'autres curieux ou passionnés à comprendre les mouvements complexes des marchés financiers.</p>
+  </section>
+
+  <section class="section">
+    <h2>Comment ça marche ?</h2>
+    <p>Chaque modèle présenté est le fruit d’analyses de séries temporelles, de techniques d’apprentissage automatique, et de backtests rigoureux. Les résultats sont visibles pour chaque modèle dans une page dédiée.</p>
+  </section>
+
+  <!-- Scripts -->
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    gsap.to('.hero p', {
+      scrollTrigger: {
+        trigger: '.hero',
+        start: 'top 70%',
+      },
+      opacity: 1,
+      y: -10,
+      duration: 1,
+      delay: 0.3,
+      ease: 'power2.out'
+    });
+
+    gsap.to('.hero-buttons', {
+      scrollTrigger: {
+        trigger: '.hero',
+        start: 'top 65%',
+      },
+      opacity: 1,
+      y: -10,
+      duration: 1,
+      delay: 0.6,
+      ease: 'power2.out'
+    });
+
+    // Neige
+    const canvas = document.getElementById('snow-canvas');
+    let width, height, snowflakes = [];
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      initSnowflakes();
+    }
+
+    function initSnowflakes(count = 150) {
+      snowflakes = Array.from({ length: count }).map(() => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        r: Math.random() * 3 + 1,
+        d: Math.random() * 1 + 0.5
+      }));
+    }
+
+    function drawSnowflakes() {
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = 'white';
+      ctx.beginPath();
+      for (let flake of snowflakes) {
+        ctx.moveTo(flake.x, flake.y);
+        ctx.arc(flake.x, flake.y, flake.r, 0, Math.PI * 2);
+      }
+      ctx.fill();
+      updateSnowflakes();
+    }
+
+    function updateSnowflakes() {
+      for (let flake of snowflakes) {
+        flake.y += flake.d;
+        if (flake.y > height) {
+          flake.y = 0;
+          flake.x = Math.random() * width;
+        }
+      }
+    }
+
+    function animateSnow() {
+      drawSnowflakes();
+      requestAnimationFrame(animateSnow);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    animateSnow();
+  </script>
+</body>
+</html>
