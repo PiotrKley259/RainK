@@ -9,11 +9,10 @@
 
   <style>
     :root {
-      --blue: #0066ff;
-      --dark: #0a0b0f;
-      --light: #f4f4f5;
-      --glass: rgba(255,255,255,0.05);
-      --border: rgba(255,255,255,0.1);
+      --day: #e0f2ff;
+      --night: #1e1b4b;
+      --text-day: #111827;
+      --text-night: #f1f5f9;
     }
 
     * {
@@ -24,9 +23,10 @@
 
     html, body {
       font-family: 'Inter', sans-serif;
-      background: var(--dark);
-      color: white;
+      background: var(--day);
+      color: var(--text-day);
       overflow-x: hidden;
+      transition: background 1s ease, color 1s ease;
     }
 
     #three-bg {
@@ -52,14 +52,14 @@
     }
 
     h1 span {
-      background: linear-gradient(135deg, var(--blue), #00d4ff);
+      background: linear-gradient(135deg, #0066ff, #00d4ff);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
     p {
       font-size: 1.2rem;
-      color: #cbd5e1;
+      color: inherit;
       max-width: 700px;
       margin-bottom: 2.5rem;
     }
@@ -68,7 +68,7 @@
       padding: 14px 30px;
       font-weight: 600;
       font-size: 1rem;
-      background: linear-gradient(135deg, var(--blue), #0038ff);
+      background: linear-gradient(135deg, #0066ff, #0038ff);
       color: white;
       border: none;
       border-radius: 40px;
@@ -94,7 +94,7 @@
   </section>
 
   <script>
-    let scene, camera, renderer, mountain;
+    let scene, camera, renderer, mountain, celestialBody, ambientLight;
 
     function initThree() {
       const container = document.getElementById('three-bg');
@@ -111,29 +111,35 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       container.appendChild(renderer.domElement);
 
-      // Light
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      // Ambient Light (will be adjusted)
+      ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
       scene.add(ambientLight);
 
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      directionalLight.position.set(5, 10, 7.5);
-      scene.add(directionalLight);
+      // Directional light to simulate sun/moon
+      const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      dirLight.position.set(5, 10, 7.5);
+      scene.add(dirLight);
 
-      // Geometry (mountain-like plane)
+      // Celestial body (sun or moon)
+      const bodyGeometry = new THREE.SphereGeometry(0.4, 32, 32);
+      const bodyMaterial = new THREE.MeshBasicMaterial({ color: 0xffd700 });
+      celestialBody = new THREE.Mesh(bodyGeometry, bodyMaterial);
+      scene.add(celestialBody);
+
+      // Mountain
       const geometry = new THREE.PlaneGeometry(30, 15, 128, 128);
       geometry.rotateX(-Math.PI / 2);
-      const positionAttr = geometry.attributes.position;
+      const posAttr = geometry.attributes.position;
 
-      for (let i = 0; i < positionAttr.count; i++) {
-        const x = positionAttr.getX(i);
-        const z = positionAttr.getZ(i);
+      for (let i = 0; i < posAttr.count; i++) {
+        const x = posAttr.getX(i);
+        const z = posAttr.getZ(i);
         const y = Math.sin(x * 0.3) * Math.cos(z * 0.4) * 2 + Math.random() * 0.5;
-        positionAttr.setY(i, y);
+        posAttr.setY(i, y);
       }
 
       const material = new THREE.MeshStandardMaterial({
         color: 0x1f2937,
-        wireframe: false,
         roughness: 0.8,
         metalness: 0.1,
         flatShading: true,
@@ -143,7 +149,34 @@
       mountain.position.y = -1;
       scene.add(mountain);
 
+      updateSceneByTime();
       animate();
+    }
+
+    function updateSceneByTime() {
+      const now = new Date();
+      const hours = now.getHours();
+
+      // Interpolate position in the sky (from left to right)
+      const progress = hours / 24;
+      const x = -8 + progress * 16; // from -8 to +8
+      const y = Math.sin(progress * Math.PI) * 4 + 3; // nice arc
+
+      celestialBody.position.set(x, y, -5);
+
+      if (hours >= 6 && hours <= 18) {
+        // Daytime
+        celestialBody.material.color.set(0xffd700); // Sun (gold)
+        ambientLight.intensity = 0.7;
+        document.body.style.background = getComputedStyle(document.documentElement).getPropertyValue('--day');
+        document.body.style.color = getComputedStyle(document.documentElement).getPropertyValue('--text-day');
+      } else {
+        // Night
+        celestialBody.material.color.set(0xb0c4de); // Moon (light steel blue)
+        ambientLight.intensity = 0.3;
+        document.body.style.background = getComputedStyle(document.documentElement).getPropertyValue('--night');
+        document.body.style.color = getComputedStyle(document.documentElement).getPropertyValue('--text-night');
+      }
     }
 
     function animate() {
@@ -158,9 +191,7 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    document.addEventListener('DOMContentLoaded', () => {
-      initThree();
-    });
+    document.addEventListener('DOMContentLoaded', initThree);
   </script>
 
 </body>
