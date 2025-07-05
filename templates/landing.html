@@ -152,6 +152,7 @@
             z-index: -1;
             pointer-events: none;
             overflow: hidden;
+            position : relative;
         }
 
         .bubble {
@@ -610,6 +611,7 @@
         // Ocean bubbles system
         function createOceanBubbles() {
             const bubblesContainer = document.getElementById('oceanBubbles');
+            const containerWidth = bubblesContainer.offsetWidth;
             
             for (let i = 0; i < 20; i++) {
                 const bubble = document.createElement('div');
