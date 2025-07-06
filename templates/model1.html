@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RainK – Prédiction Prix du Gaz</title>
+  <title>RainK – Natural Gas Price Prediction</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
@@ -56,6 +56,74 @@
       font-size: 1.2rem;
       color: #cbd5e1;
       margin-bottom: 2rem;
+    }
+
+    .explanation-section {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .explanation-section h2 {
+      color: var(--blue);
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+    }
+
+    .explanation-section h3 {
+      color: #00d4ff;
+      margin-bottom: 1rem;
+      margin-top: 2rem;
+      font-size: 1.2rem;
+    }
+
+    .explanation-section p {
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      color: #cbd5e1;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .feature-card {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 1.5rem;
+    }
+
+    .feature-card h4 {
+      color: var(--green);
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-card p {
+      font-size: 0.9rem;
+      color: #94a3b8;
+    }
+
+    .tech-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+
+    .tech-item {
+      background: rgba(0, 102, 255, 0.2);
+      color: var(--blue);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
     }
 
     .prediction-card {
@@ -228,6 +296,7 @@
 
     @media (max-width: 768px) {
       .prediction-grid { grid-template-columns: 1fr; }
+      .feature-grid { grid-template-columns: 1fr; }
       .container { padding: 10px; }
       .modal-content { width: 95%; margin: 10% auto; }
     }
@@ -238,40 +307,101 @@
 
   <div class="container">
     <div class="header">
-      <h1>🔮 Prédiction Prix du Gaz Naturel</h1>
-      <p>Modèle de Machine Learning basé sur XGBoost et données EIA</p>
+      <h1>Natural Gas Price Prediction System</h1>
+      <p>Advanced Machine Learning Model using XGBoost and EIA Data</p>
+    </div>
+
+    <div class="explanation-section">
+      <h2>About This Prediction Model</h2>
+      <p>
+        This system utilizes a sophisticated machine learning approach to predict natural gas prices based on historical data and technical indicators. The model leverages XGBoost regression with carefully engineered features to forecast next-day price movements.
+      </p>
+
+      <h3>Data Source</h3>
+      <p>
+        The model fetches real-time data from the U.S. Energy Information Administration (EIA) API, specifically focusing on natural gas futures prices. This ensures our predictions are based on the most current and authoritative energy market data available.
+      </p>
+
+      <h3>Technical Features Used</h3>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h4>Price Returns</h4>
+          <p>Multi-period returns (1, 2, 3, 5, 10 days) to capture short-term price momentum and trends</p>
+        </div>
+        <div class="feature-card">
+          <h4>Volatility Measures</h4>
+          <p>Rolling volatility calculations over 5, 10, and 20-day windows to assess market uncertainty</p>
+        </div>
+        <div class="feature-card">
+          <h4>Technical Indicators</h4>
+          <p>RSI (Relative Strength Index) and Bollinger Bands to identify overbought/oversold conditions</p>
+        </div>
+        <div class="feature-card">
+          <h4>Momentum Features</h4>
+          <p>Multi-timeframe momentum indicators to capture directional price movements</p>
+        </div>
+        <div class="feature-card">
+          <h4>Moving Averages</h4>
+          <p>Price relationships to various moving averages to identify trend strength</p>
+        </div>
+        <div class="feature-card">
+          <h4>Seasonal Patterns</h4>
+          <p>Day-of-week, monthly, and quarterly patterns to capture cyclical market behavior</p>
+        </div>
+      </div>
+
+      <h3>Model Architecture</h3>
+      <p>
+        The prediction system employs XGBoost (Extreme Gradient Boosting) with optimized hyperparameters specifically tuned for financial time series data. The model predicts percentage returns rather than absolute prices, which provides better stability and accuracy for volatile commodity markets.
+      </p>
+
+      <h3>Technology Stack</h3>
+      <div class="tech-stack">
+        <span class="tech-item">Python</span>
+        <span class="tech-item">XGBoost</span>
+        <span class="tech-item">Pandas</span>
+        <span class="tech-item">NumPy</span>
+        <span class="tech-item">Scikit-learn</span>
+        <span class="tech-item">EIA API</span>
+      </div>
+
+      <h3>Model Performance</h3>
+      <p>
+        The model is trained on historical data spanning multiple years and employs temporal validation to ensure robust performance. It uses regularization techniques to prevent overfitting and incorporates early stopping to optimize generalization. Performance metrics include R-squared score, Mean Absolute Error (MAE), and Root Mean Square Error (RMSE).
+      </p>
     </div>
 
     <div class="prediction-card">
-      <div id="loading" class="loading">Chargement de la prédiction...</div>
+      <h2 style="color: var(--blue); margin-bottom: 1.5rem;">Current Prediction</h2>
+      <div id="loading" class="loading">Loading prediction data...</div>
       <div id="error" class="error" style="display: none;"></div>
       <div id="prediction-content" style="display: none;">
         <div class="prediction-grid">
           <div class="metric-card">
             <div class="metric-value" id="current-price">-</div>
-            <div class="metric-label">Prix Actuel ($)</div>
+            <div class="metric-label">Current Price ($)</div>
           </div>
           <div class="metric-card">
             <div class="metric-value" id="predicted-price">-</div>
-            <div class="metric-label">Prix Prédit ($)</div>
+            <div class="metric-label">Predicted Price ($)</div>
           </div>
           <div class="metric-card">
             <div class="metric-value" id="price-change">-</div>
-            <div class="metric-label">Variation ($)</div>
+            <div class="metric-label">Price Change ($)</div>
           </div>
           <div class="metric-card">
             <div class="metric-value" id="price-change-pct">-</div>
-            <div class="metric-label">Variation (%)</div>
+            <div class="metric-label">Change Percentage</div>
           </div>
         </div>
-        <div class="last-updated" id="last-updated">Dernière mise à jour: -</div>
+        <div class="last-updated" id="last-updated">Last updated: -</div>
       </div>
     </div>
 
     <div class="actions">
-      <button class="btn" onclick="loadPrediction()">🔄 Actualiser</button>
-      <button class="btn btn-secondary" onclick="showModelInfo()">📊 Infos Modèle</button>
-      <a href="/" class="btn btn-secondary">← Retour</a>
+      <button class="btn" onclick="loadPrediction()">Refresh Prediction</button>
+      <button class="btn btn-secondary" onclick="showModelInfo()">Model Metrics</button>
+      <a href="/" class="btn btn-secondary">Back to Home</a>
     </div>
   </div>
 
@@ -279,8 +409,8 @@
   <div id="modelModal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeModal()">&times;</span>
-      <h2>📊 Informations du Modèle</h2>
-      <div id="modal-loading" class="loading">Chargement des métriques...</div>
+      <h2>Model Performance Metrics</h2>
+      <div id="modal-loading" class="loading">Loading metrics...</div>
       <div id="modal-error" class="error" style="display: none;"></div>
       <div id="modal-metrics" class="modal-metrics" style="display: none;">
         <div class="modal-metric">
@@ -296,7 +426,7 @@
           <span id="rmse">-</span>
         </div>
         <div class="modal-metric">
-          <span><strong>Dernière formation:</strong></span>
+          <span><strong>Last Training:</strong></span>
           <span id="last-trained">-</span>
         </div>
       </div>
@@ -381,18 +511,18 @@
           pctElem.className = 'metric-value ' + (change >= 0 ? 'positive' : 'negative');
 
           document.getElementById('last-updated').textContent =
-            data.last_updated ? 'Dernière mise à jour: ' + new Date(data.last_updated).toLocaleString('fr-FR')
-                              : 'Dernière mise à jour: inconnue';
+            data.last_updated ? 'Last updated: ' + new Date(data.last_updated).toLocaleString('en-US')
+                              : 'Last updated: unknown';
 
           loading.style.display = 'none';
           content.style.display = 'block';
         } else {
-          throw new Error(data.error || 'Erreur inconnue');
+          throw new Error(data.error || 'Unknown error');
         }
       } catch (err) {
         loading.style.display = 'none';
         error.style.display = 'block';
-        error.textContent = `Erreur: ${err.message}`;
+        error.textContent = `Error: ${err.message}`;
       }
     }
 
@@ -417,17 +547,17 @@
           document.getElementById('r2-score').textContent = data.metrics.r2_score || '-';
           document.getElementById('mae').textContent = data.metrics.mae || '-';
           document.getElementById('rmse').textContent = data.metrics.rmse || '-';
-          document.getElementById('last-trained').textContent = data.metrics.last_trained || 'Non disponible';
+          document.getElementById('last-trained').textContent = data.metrics.last_trained || 'Not available';
           
           loading.style.display = 'none';
           metrics.style.display = 'block';
         } else {
-          throw new Error(data.error || 'Erreur inconnue');
+          throw new Error(data.error || 'Unknown error');
         }
       } catch (err) {
         loading.style.display = 'none';
         error.style.display = 'block';
-        error.textContent = `Erreur: ${err.message}`;
+        error.textContent = `Error: ${err.message}`;
       }
     }
 
