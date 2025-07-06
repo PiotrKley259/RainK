@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RainK – Modèle 1</title>
+  <title>RainK – Prédiction Prix du Gaz</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
@@ -12,20 +12,18 @@
       --blue: #0066ff;
       --dark: #0a0b0f;
       --light: #f4f4f5;
+      --green: #10b981;
+      --red: #ef4444;
+      --yellow: #f59e0b;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     html, body {
       font-family: 'Inter', sans-serif;
       background: var(--dark);
       color: white;
       overflow-x: hidden;
-      height: 100%;
     }
 
     #three-bg {
@@ -34,60 +32,190 @@
       z-index: -10;
     }
 
-    .centered {
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      text-align: center;
-      padding: 0 20px;
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      position: relative;
+      z-index: 1;
     }
 
-    h1 {
-      font-size: clamp(2.5rem, 6vw, 4rem);
+    .header { text-align: center; margin-bottom: 3rem; padding-top: 2rem; }
+
+    .header h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
       font-weight: 800;
       margin-bottom: 1rem;
+      background: linear-gradient(135deg, var(--blue), #00d4ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
-    p {
-      font-size: 1.3rem;
+    .header p {
+      font-size: 1.2rem;
       color: #cbd5e1;
       margin-bottom: 2rem;
     }
 
-    a.btn {
-      padding: 14px 30px;
+    .prediction-card {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .prediction-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .metric-card {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+
+    .metric-label {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .positive { color: var(--green); }
+    .negative { color: var(--red); }
+    .neutral { color: var(--yellow); }
+
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: #64748b;
+    }
+
+    .loading::after {
+      content: '';
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #64748b;
+      border-top: 2px solid var(--blue);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-left: 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fecaca;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
       font-weight: 600;
       font-size: 1rem;
       background: linear-gradient(135deg, var(--blue), #0038ff);
       color: white;
       border: none;
-      border-radius: 40px;
+      border-radius: 25px;
       cursor: pointer;
       text-decoration: none;
       transition: 0.3s ease;
+      margin: 0.5rem;
     }
 
-    a.btn:hover {
-      box-shadow: 0 8px 30px rgba(0, 102, 255, 0.5);
+    .btn:hover {
+      box-shadow: 0 8px 25px rgba(0, 102, 255, 0.4);
       transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .actions {
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    .last-updated {
+      font-size: 0.9rem;
+      color: #64748b;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .prediction-grid { grid-template-columns: 1fr; }
+      .container { padding: 10px; }
     }
   </style>
 </head>
 <body>
-
-  <!-- Fond montagne 3D -->
   <div id="three-bg"></div>
 
-  <!-- Contenu centré -->
-  <div class="centered">
-    <h1>Modèle 1</h1>
-    <p>Ce modèle de prédiction sera disponible prochainement.</p>
-    <a href="/" class="btn">← Retour à l'accueil</a>
+  <div class="container">
+    <div class="header">
+      <h1>🔮 Prédiction Prix du Gaz Naturel</h1>
+      <p>Modèle de Machine Learning basé sur XGBoost et données EIA</p>
+    </div>
+
+    <div class="prediction-card">
+      <div id="loading" class="loading">Chargement de la prédiction...</div>
+      <div id="error" class="error" style="display: none;"></div>
+      <div id="prediction-content" style="display: none;">
+        <div class="prediction-grid">
+          <div class="metric-card">
+            <div class="metric-value" id="current-price">-</div>
+            <div class="metric-label">Prix Actuel ($)</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="predicted-price">-</div>
+            <div class="metric-label">Prix Prédit ($)</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="price-change">-</div>
+            <div class="metric-label">Variation ($)</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="price-change-pct">-</div>
+            <div class="metric-label">Variation (%)</div>
+          </div>
+        </div>
+        <div class="last-updated" id="last-updated">Dernière mise à jour: -</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" onclick="loadPrediction()">🔄 Actualiser</button>
+      <button class="btn btn-secondary" onclick="showModelInfo()">📊 Infos Modèle</button>
+      <a href="/" class="btn btn-secondary">← Retour</a>
+    </div>
   </div>
 
-  <!-- Script Three.js -->
   <script>
     let scene, camera, renderer, mountain;
 
@@ -96,18 +224,13 @@
       scene = new THREE.Scene();
       camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 100);
       camera.position.set(0, 2, 8);
-
       renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
       container.appendChild(renderer.domElement);
-
-      // Lights
       scene.add(new THREE.AmbientLight(0xffffff, 0.6));
       const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
       dirLight.position.set(5, 10, 7.5);
       scene.add(dirLight);
-
-      // Mountain geometry
       const geometry = new THREE.PlaneGeometry(30, 15, 128, 128);
       geometry.rotateX(-Math.PI / 2);
       const pos = geometry.attributes.position;
@@ -118,18 +241,15 @@
         pos.setY(i, y);
       }
       geometry.attributes.position.needsUpdate = true;
-
       const material = new THREE.MeshStandardMaterial({
         color: 0x1f2937,
         roughness: 0.8,
         metalness: 0.1,
         flatShading: true
       });
-
       mountain = new THREE.Mesh(geometry, material);
       mountain.position.y = -1;
       scene.add(mountain);
-
       animate();
     }
 
@@ -145,7 +265,70 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    document.addEventListener('DOMContentLoaded', initThree);
+    async function loadPrediction() {
+      const loading = document.getElementById('loading');
+      const error = document.getElementById('error');
+      const content = document.getElementById('prediction-content');
+      loading.style.display = 'block';
+      error.style.display = 'none';
+      content.style.display = 'none';
+
+      try {
+        const response = await fetch('/api/predict');
+        const data = await response.json();
+        if (data.success) {
+          const format = (val, decimals = 4) => val != null ? val.toFixed(decimals) : '-';
+          document.getElementById('current-price').textContent = format(data.current_price);
+          document.getElementById('predicted-price').textContent = format(data.predicted_price);
+
+          const change = data.price_change != null ? data.price_change : 0;
+          const pct = data.price_change_pct != null ? data.price_change_pct : 0;
+
+          const changeElem = document.getElementById('price-change');
+          const pctElem = document.getElementById('price-change-pct');
+
+          changeElem.textContent = (change >= 0 ? '+' : '') + change.toFixed(4);
+          pctElem.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
+
+          changeElem.className = 'metric-value ' + (change >= 0 ? 'positive' : 'negative');
+          pctElem.className = 'metric-value ' + (change >= 0 ? 'positive' : 'negative');
+
+          document.getElementById('last-updated').textContent =
+            data.last_updated ? 'Dernière mise à jour: ' + new Date(data.last_updated).toLocaleString('fr-FR')
+                              : 'Dernière mise à jour: inconnue';
+
+          loading.style.display = 'none';
+          content.style.display = 'block';
+        } else {
+          throw new Error(data.error || 'Erreur inconnue');
+        }
+      } catch (err) {
+        loading.style.display = 'none';
+        error.style.display = 'block';
+        error.textContent = `Erreur: ${err.message}`;
+      }
+    }
+
+    async function showModelInfo() {
+      try {
+        const response = await fetch('/api/model-performance');
+        const data = await response.json();
+        if (data.success) {
+          alert(`Informations du modèle:\n\n` +
+                `R² Score: ${data.metrics.r2_score}\n` +
+                `MAE: ${data.metrics.mae}\n` +
+                `RMSE: ${data.metrics.rmse}\n` +
+                `Dernière formation: ${data.metrics.last_trained || 'Non disponible'}`);
+        }
+      } catch (err) {
+        alert('Impossible de charger les informations du modèle');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initThree();
+      loadPrediction();
+    });
   </script>
 </body>
 </html>
