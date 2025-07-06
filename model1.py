@@ -163,16 +163,26 @@ class GasPricePredictor:
         predicted_price = self.model.predict(X_latest_scaled)[0]
         current_price = df['Price'].iloc[-1]
         
+        # Vérifier que les valeurs sont valides
+        if pd.isna(predicted_price) or pd.isna(current_price):
+            raise ValueError("Valeurs de prix invalides (NaN)")
+        
         price_change = predicted_price - current_price
         price_change_pct = (price_change / current_price) * 100
         
-        # CORRECTION: Convertir les valeurs NumPy en types Python natifs
+        # CORRECTION: Convertir les valeurs NumPy en types Python natifs et gérer les valeurs NaN
+        # Vérifier et nettoyer les valeurs NaN/infinies
+        if np.isnan(predicted_price) or np.isinf(predicted_price):
+            predicted_price = current_price
+            price_change = 0
+            price_change_pct = 0
+        
         return {
-            'current_price': float(current_price),
-            'predicted_price': float(predicted_price),
-            'price_change': float(price_change),
-            'price_change_pct': float(price_change_pct),
-            'confidence': 'Modéle entraîné avec succès',
+            'current_price': round(float(current_price), 4),
+            'predicted_price': round(float(predicted_price), 4),
+            'price_change': round(float(price_change), 4),
+            'price_change_pct': round(float(price_change_pct), 2),
+            'confidence': 'Modele entraine avec succes',
             'prediction_date': (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
         }
     
@@ -200,11 +210,19 @@ class GasPricePredictor:
         mae = mean_absolute_error(y, y_pred)
         rmse = mean_squared_error(y, y_pred, squared=False)
 
-        # CORRECTION: Convertir les métriques en types Python natifs
+        # CORRECTION: Convertir les métriques en types Python natifs et gérer les valeurs NaN
+        # Vérifier et nettoyer les valeurs NaN/infinies
+        if np.isnan(r2) or np.isinf(r2):
+            r2 = 0.0
+        if np.isnan(mae) or np.isinf(mae):
+            mae = 0.0
+        if np.isnan(rmse) or np.isinf(rmse):
+            rmse = 0.0
+            
         return {
-            'r2_score': float(r2),
-            'mae': float(mae),
-            'rmse': float(rmse),
+            'r2_score': round(float(r2), 4),
+            'mae': round(float(mae), 4),
+            'rmse': round(float(rmse), 4),
             'last_trained': self.last_update
         }
     
