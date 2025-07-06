@@ -208,7 +208,10 @@ class GasPricePredictor:
 
         r2 = r2_score(y, y_pred)
         mae = mean_absolute_error(y, y_pred)
-        rmse = mean_squared_error(y, y_pred, squared=False)
+        
+        # CORRECTION: Calcul du RMSE compatible avec toutes les versions de scikit-learn
+        mse = mean_squared_error(y, y_pred)
+        rmse = np.sqrt(mse)
 
         # CORRECTION: Convertir les métriques en types Python natifs et gérer les valeurs NaN
         # Vérifier et nettoyer les valeurs NaN/infinies
