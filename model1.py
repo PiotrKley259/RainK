@@ -13,7 +13,7 @@ warnings.filterwarnings('ignore')
 
 class GasPricePredictor:
     def __init__(self):
-        self.api_key = os.getenv("EIA_API_KEY")
+        self.api_key = 'OGEllO09BgxinM54A1nHEKTcU8juJuI5CvdUIvNe'
         self.model = None
         self.scaler = None
         self.feature_cols = None
