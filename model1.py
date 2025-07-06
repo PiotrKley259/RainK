@@ -166,17 +166,16 @@ class GasPricePredictor:
         price_change = predicted_price - current_price
         price_change_pct = (price_change / current_price) * 100
         
+        # CORRECTION: Convertir les valeurs NumPy en types Python natifs
         return {
-            'current_price': round(current_price, 4),
-            'predicted_price': round(predicted_price, 4),
-            'price_change': round(price_change, 4),
-            'price_change_pct': round(price_change_pct, 2),
+            'current_price': float(current_price),
+            'predicted_price': float(predicted_price),
+            'price_change': float(price_change),
+            'price_change_pct': float(price_change_pct),
             'confidence': 'Modéle entraîné avec succès',
             'prediction_date': (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
         }
     
-    
-
     def get_model_metrics(self):
         """Calcule les vraies métriques du modèle sur les données d'entraînement"""
         if self.model is None or self.scaler is None or self.feature_cols is None:
@@ -201,13 +200,13 @@ class GasPricePredictor:
         mae = mean_absolute_error(y, y_pred)
         rmse = mean_squared_error(y, y_pred, squared=False)
 
+        # CORRECTION: Convertir les métriques en types Python natifs
         return {
-            'r2_score': round(r2, 4),
-            'mae': round(mae, 4),
-            'rmse': round(rmse, 4),
+            'r2_score': float(r2),
+            'mae': float(mae),
+            'rmse': float(rmse),
             'last_trained': self.last_update
         }
-
     
     def save_model(self):
         """Sauvegarde le modèle et le scaler"""
