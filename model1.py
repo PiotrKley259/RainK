@@ -62,23 +62,39 @@ class GasPricePredictor:
             raise Exception(f"Erreur lors de la récupération des données: {e}")
     
     def add_features(self, df):
-        """Ajoute toutes les features nécessaires"""
-        # Features basées sur les prix
+        """Ajoute toutes les features nécessaires - CORRECTION: Toutes les features sont décalées"""
+        # IMPORTANT: Toutes les features doivent être décalées d'au moins 1 jour
+        # pour éviter le look-ahead bias
+        
+        # Features basées sur les prix (décalées)
         for window in [3, 5, 10, 21]:
             df[f'sma_{window}'] = df['Price'].shift(1).rolling(window=window).mean()
             df[f'price_vs_sma_{window}'] = (df['Price'].shift(1) - df[f'sma_{window}']) / df[f'sma_{window}']
         
-        # Volatilité
+        # Volatilité (décalée)
         df['return_1d'] = df['Price'].pct_change(1)
         for window in [5, 10, 21]:
             df[f'volatility_{window}'] = df['return_1d'].shift(1).rolling(window=window).std()
         
-        # Prix décalés
+        # Prix décalés (minimum 1 jour)
         for lag in [1, 2, 3, 5, 10]:
             df[f'price_lag_{lag}'] = df['Price'].shift(lag)
         
-        # RSI simple
-        df['rsi_14'] = self.calculate_rsi(df['Price'], 14)
+        # RSI simple (décalé)
+        df['rsi_14'] = self.calculate_rsi(df['Price'], 14).shift(1)
+        
+        # Features supplémentaires décalées
+        df['price_momentum_3'] = (df['Price'].shift(1) - df['Price'].shift(4)) / df['Price'].shift(4)
+        df['price_momentum_5'] = (df['Price'].shift(1) - df['Price'].shift(6)) / df['Price'].shift(6)
+        
+        # Moyennes mobiles exponentielles décalées
+        df['ema_5'] = df['Price'].shift(1).ewm(span=5).mean()
+        df['ema_21'] = df['Price'].shift(1).ewm(span=21).mean()
+        df['ema_ratio'] = df['ema_5'] / df['ema_21']
+        
+        # Écart type mobile décalé
+        df['rolling_std_10'] = df['Price'].shift(1).rolling(window=10).std()
+        df['price_std_ratio'] = df['Price'].shift(1) / df['rolling_std_10']
         
         return df
     
@@ -89,10 +105,10 @@ class GasPricePredictor:
         loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
         rs = gain / loss
         rsi = 100 - (100 / (1 + rs))
-        return rsi.shift(1)
+        return rsi
     
     def train_model(self, retrain=False):
-        """Entraîne le modèle (appelé si nécessaire)"""
+        """Entraîne le modèle avec validation temporelle"""
         if self.model is not None and not retrain:
             return
         
@@ -102,10 +118,10 @@ class GasPricePredictor:
         df = self.fetch_gas_data(days=2000)
         df = self.add_features(df)
         
-        # Créer la cible
+        # CORRECTION: Target correctement défini (prédire le prix du lendemain)
         df['target'] = df['Price'].shift(-1)
         
-        # Sélectionner les features
+        # Sélectionner les features (exclure les colonnes non-features)
         self.feature_cols = [col for col in df.columns if col not in ['date', 'Price', 'target', 'return_1d']]
         
         # Nettoyer les données
@@ -114,31 +130,73 @@ class GasPricePredictor:
         if len(df) < 100:
             raise ValueError("Données insuffisantes pour l'entraînement")
         
-        # Préparer les données
-        X = df[self.feature_cols]
-        y = df['target']
+        # CORRECTION: Division temporelle pour éviter le look-ahead bias
+        # Utiliser les 80% premiers pour l'entraînement, 20% derniers pour la validation
+        split_idx = int(len(df) * 0.8)
+        
+        train_df = df.iloc[:split_idx]
+        val_df = df.iloc[split_idx:]
+        
+        # Préparer les données d'entraînement
+        X_train = train_df[self.feature_cols]
+        y_train = train_df['target']
+        
+        X_val = val_df[self.feature_cols]
+        y_val = val_df['target']
         
         # Normalisation
         self.scaler = StandardScaler()
-        X_scaled = self.scaler.fit_transform(X)
+        X_train_scaled = self.scaler.fit_transform(X_train)
+        X_val_scaled = self.scaler.transform(X_val)
         
         # Entraîner le modèle
         self.model = xgb.XGBRegressor(
             n_estimators=200,
-            max_depth=5,
-            learning_rate=0.08,
+            max_depth=4,  # Réduit pour éviter l'overfitting
+            learning_rate=0.05,  # Réduit pour une meilleure généralisation
             subsample=0.8,
             colsample_bytree=0.8,
             objective="reg:squarederror",
-            random_state=42
+            random_state=42,
+            early_stopping_rounds=20
         )
         
-        self.model.fit(X_scaled, y)
+        # Entraînement avec validation
+        self.model.fit(
+            X_train_scaled, y_train,
+            eval_set=[(X_val_scaled, y_val)],
+            verbose=False
+        )
         
-        # Sauvegarder le modèle
+        # Sauvegarder le modèle avec les métriques de validation
+        self.val_metrics = self.calculate_validation_metrics(X_val_scaled, y_val)
         self.save_model()
         
         print("Modèle entraîné avec succès!")
+        print(f"Métriques de validation: R²={self.val_metrics['r2_score']:.4f}, MAE={self.val_metrics['mae']:.4f}")
+    
+    def calculate_validation_metrics(self, X_val_scaled, y_val):
+        """Calcule les métriques sur les données de validation"""
+        y_pred = self.model.predict(X_val_scaled)
+        
+        r2 = r2_score(y_val, y_pred)
+        mae = mean_absolute_error(y_val, y_pred)
+        mse = mean_squared_error(y_val, y_pred)
+        rmse = np.sqrt(mse)
+        
+        # Vérifier et nettoyer les valeurs NaN/infinies
+        if np.isnan(r2) or np.isinf(r2):
+            r2 = 0.0
+        if np.isnan(mae) or np.isinf(mae):
+            mae = 0.0
+        if np.isnan(rmse) or np.isinf(rmse):
+            rmse = 0.0
+            
+        return {
+            'r2_score': round(float(r2), 4),
+            'mae': round(float(mae), 4),
+            'rmse': round(float(rmse), 4)
+        }
     
     def get_prediction(self):
         """Obtient la prédiction pour le lendemain"""
@@ -170,7 +228,6 @@ class GasPricePredictor:
         price_change = predicted_price - current_price
         price_change_pct = (price_change / current_price) * 100
         
-        # CORRECTION: Convertir les valeurs NumPy en types Python natifs et gérer les valeurs NaN
         # Vérifier et nettoyer les valeurs NaN/infinies
         if np.isnan(predicted_price) or np.isinf(predicted_price):
             predicted_price = current_price
@@ -182,52 +239,31 @@ class GasPricePredictor:
             'predicted_price': round(float(predicted_price), 4),
             'price_change': round(float(price_change), 4),
             'price_change_pct': round(float(price_change_pct), 2),
-            'confidence': 'Modele entraine avec succes',
+            'confidence': 'Modele entraine sans look-ahead bias',
             'prediction_date': (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
         }
     
     def get_model_metrics(self):
-        """Calcule les vraies métriques du modèle sur les données d'entraînement"""
+        """Retourne les métriques de validation (pas d'entraînement)"""
         if self.model is None or self.scaler is None or self.feature_cols is None:
             raise ValueError("Le modèle n'est pas encore entraîné.")
 
-        # Charger les données utilisées pour l'entraînement
-        df = self.fetch_gas_data(days=2000)
-        df = self.add_features(df)
-        df['target'] = df['Price'].shift(-1)
-        df = df.dropna(subset=['target'] + self.feature_cols)
-
-        if len(df) == 0:
-            raise ValueError("Pas assez de données pour évaluer le modèle.")
-
-        X = df[self.feature_cols]
-        y = df['target']
-        X_scaled = self.scaler.transform(X)
-
-        y_pred = self.model.predict(X_scaled)
-
-        r2 = r2_score(y, y_pred)
-        mae = mean_absolute_error(y, y_pred)
-        
-        # CORRECTION: Calcul du RMSE compatible avec toutes les versions de scikit-learn
-        mse = mean_squared_error(y, y_pred)
-        rmse = np.sqrt(mse)
-
-        # CORRECTION: Convertir les métriques en types Python natifs et gérer les valeurs NaN
-        # Vérifier et nettoyer les valeurs NaN/infinies
-        if np.isnan(r2) or np.isinf(r2):
-            r2 = 0.0
-        if np.isnan(mae) or np.isinf(mae):
-            mae = 0.0
-        if np.isnan(rmse) or np.isinf(rmse):
-            rmse = 0.0
-            
-        return {
-            'r2_score': round(float(r2), 4),
-            'mae': round(float(mae), 4),
-            'rmse': round(float(rmse), 4),
-            'last_trained': self.last_update
-        }
+        # Retourner les métriques de validation stockées
+        if hasattr(self, 'val_metrics'):
+            return {
+                **self.val_metrics,
+                'last_trained': self.last_update,
+                'note': 'Métriques calculées sur données de validation (pas d\'entraînement)'
+            }
+        else:
+            # Fallback si pas de métriques de validation
+            return {
+                'r2_score': 'N/A',
+                'mae': 'N/A', 
+                'rmse': 'N/A',
+                'last_trained': self.last_update,
+                'note': 'Métriques de validation non disponibles'
+            }
     
     def save_model(self):
         """Sauvegarde le modèle et le scaler"""
@@ -235,7 +271,8 @@ class GasPricePredictor:
             'model': self.model,
             'scaler': self.scaler,
             'feature_cols': self.feature_cols,
-            'last_update': datetime.now().isoformat()
+            'last_update': datetime.now().isoformat(),
+            'val_metrics': getattr(self, 'val_metrics', {})
         }
         
         with open('gas_price_model.pkl', 'wb') as f:
@@ -251,6 +288,7 @@ class GasPricePredictor:
             self.scaler = model_data['scaler']
             self.feature_cols = model_data['feature_cols']
             self.last_update = model_data.get('last_update')
+            self.val_metrics = model_data.get('val_metrics', {})
             
             print("Modèle chargé avec succès!")
             
