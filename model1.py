@@ -339,7 +339,7 @@ class GasPricePredictor:
         current_price = df['Price'].iloc[-1]
         predicted_price = current_price * (1 + predicted_return)
         
-        if np.isna(predicted_price) or np.isinf(predicted_price):
+        if np.isnan(predicted_price) or np.isinf(predicted_price):
             predicted_price = current_price
             predicted_return = 0
         
@@ -381,7 +381,7 @@ class GasPricePredictor:
             last_price = temp_df['Price'].iloc[-1]
             predicted_price = last_price * (1 + predicted_return)
             
-            if np.isna(predicted_price) or np.isinf(predicted_price):
+            if np.isnan(predicted_price) or np.isinf(predicted_price):
                 predicted_price = last_price
                 predicted_return = 0
             
