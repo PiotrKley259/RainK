@@ -27,7 +27,7 @@ class GasPricePredictor:
         self.test_data = None
         self.load_model()
 
-    def fetch_gas_data(self, days=5000):
+    def fetch_gas_data(self, days=3000):
         """Fetch gas price data from EIA and options data from Yahoo Finance"""
         # Fetch EIA price data
         if not self.api_key:
