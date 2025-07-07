@@ -27,7 +27,7 @@ class GasPricePredictor:
         self.test_data = None
         self.load_model()
 
-    def fetch_gas_data(self, days=3000):
+    def fetch_gas_data(self, days=300):
         """Fetch gas price data from EIA and options data from Yahoo Finance"""
         # Fetch EIA price data
         if not self.api_key:
@@ -339,7 +339,7 @@ class GasPricePredictor:
         current_price = df['Price'].iloc[-1]
         predicted_price = current_price * (1 + predicted_return)
         
-        if pd.isna(predicted_price) or pd.isinf(predicted_price):
+        if np.isna(predicted_price) or np.isinf(predicted_price):
             predicted_price = current_price
             predicted_return = 0
         
@@ -381,7 +381,7 @@ class GasPricePredictor:
             last_price = temp_df['Price'].iloc[-1]
             predicted_price = last_price * (1 + predicted_return)
             
-            if pd.isna(predicted_price) or pd.isinf(predicted_price):
+            if np.isna(predicted_price) or np.isinf(predicted_price):
                 predicted_price = last_price
                 predicted_return = 0
             
