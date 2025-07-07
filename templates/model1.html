@@ -3,98 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RainK</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>RainK - Natural Gas Price Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .price-info, .weekly-forecast, .quick-actions, .model-info, .model-performance, .performance-chart {
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .quick-actions a {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .quick-actions a:hover {
+            background-color: #0056b3;
+        }
+        .performance-chart img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+    </style>
 </head>
-<body class="bg-[#121212] text-[#f5f5f5] min-h-screen flex flex-col items-center">
+<body>
+    <div class="container">
+        <h1>RainK</h1>
+        <h2>Advanced Natural Gas Weekly Price Prediction</h2>
 
-    <!-- Header Section -->
-    <section class="text-center py-12">
-        <h1 class="text-4xl font-bold mb-4">RainK</h1>
-        <p class="text-lg">Advanced Natural Gas Weekly Price Prediction</p>
-    </section>
-
-    <!-- Error Message -->
-    {% if error %}
-    <section class="max-w-4xl w-full px-4 mb-8">
-        <p class="text-red-500">{{ error }}</p>
-    </section>
-    {% endif %}
-
-    <!-- Current Price Section -->
-    <section class="max-w-4xl w-full px-4 mb-12">
-        <h2 class="text-2xl font-semibold mb-4">Current Natural Gas Price ($/MMBtu)</h2>
-        <div class="bg-[#1a1a1a] p-6 rounded-lg">
-            <p class="text-lg">Latest EIA Price: ${{ current_price }}</p>
-            <p class="text-lg">Predicted Price ({{ prediction_date }}): ${{ predicted_price }}</p>
-            <p class="text-lg">Price Change: ${{ price_change }} ({{ price_change_pct }}%)</p>
+        {% if error %}
+        <div class="error">
+            {{ error }}
         </div>
-    </section>
+        {% endif %}
 
-    <!-- Weekly Forecast Section -->
-    <section class="max-w-4xl w-full px-4 mb-12">
-        <h2 class="text-2xl font-semibold mb-4">7-Day Price Forecast</h2>
-        <div class="bg-[#1a1a1a] p-6 rounded-lg">
-            <table class="w-full text-left">
-                <thead>
-                    <tr class="border-b border-gray-600">
-                        <th class="py-2">Date</th>
-                        <th class="py-2">Day</th>
-                        <th class="py-2">Predicted Price ($)</th>
-                        <th class="py-2">Price Change ($)</th>
-                        <th class="py-2">Change (%)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for pred in weekly_predictions %}
-                    <tr>
-                        <td class="py-2">{{ pred.date }}</td>
-                        <td class="py-2">{{ pred.day_name }}</td>
-                        <td class="py-2">${{ pred.predicted_price }}</td>
-                        <td class="py-2">${{ pred.price_change_from_current }}</td>
-                        <td class="py-2">{{ pred.price_change_pct_from_current }}%</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
+        <div class="price-info">
+            <h3>Current Natural Gas Price ($/MMBtu)</h3>
+            <p>Latest EIA Price: ${{ current_price }}</p>
+            <p>Predicted Price ({{ prediction_date }}): ${{ predicted_price }}</p>
+            <p>Price Change: ${{ price_change }} ({{ price_change_pct }}%)</p>
+        </div>
+
+        <div class="weekly-forecast">
+            <h3>7-Day Price Forecast</h3>
+            <table>
+                <tr>
+                    <th>Date</th>
+                    <th>Day</th>
+                    <th>Predicted Price ($)</th>
+                    <th>Price Change ($)</th>
+                    <th>Change (%)</th>
+                </tr>
+                {% for pred in weekly_predictions %}
+                <tr>
+                    <td>{{ pred.date }}</td>
+                    <td>{{ pred.day_name }}</td>
+                    <td>${{ pred.predicted_price }}</td>
+                    <td>${{ pred.price_change_from_current }}</td>
+                    <td>{{ pred.price_change_pct_from_current }}%</td>
+                </tr>
+                {% endfor %}
             </table>
-            <div class="mt-6">
-                <h3 class="text-xl font-semibold mb-2">Weekly Summary:</h3>
-                <p>Week Start Price: ${{ weekly_summary.week_start_price }}</p>
-                <p>Week End Price: ${{ weekly_summary.week_end_price }}</p>
-                <p>Total Change: ${{ weekly_summary.total_change }} ({{ weekly_summary.total_change_pct }}%)</p>
-                <p>Max Price: ${{ weekly_summary.max_price }}</p>
-                <p>Min Price: ${{ weekly_summary.min_price }}</p>
-                <p>Average Price: ${{ weekly_summary.avg_price }}</p>
-            </div>
+            <h4>Weekly Summary:</h4>
+            <p>Week Start Price: ${{ weekly_summary.week_start_price }}</p>
+            <p>Week End Price: ${{ weekly_summary.week_end_price }}</p>
+            <p>Total Change: ${{ weekly_summary.total_change }} ({{ weekly_summary.total_change_pct }}%)</p>
+            <p>Max Price: ${{ weekly_summary.max_price }}</p>
+            <p>Min Price: ${{ weekly_summary.min_price }}</p>
+            <p>Average Price: ${{ weekly_summary.avg_price }}</p>
         </div>
-    </section>
 
-    <!-- Quick Actions Section -->
-    <section class="max-w-4xl w-full px-4 mb-12">
-        <h2 class="text-2xl font-semibold mb-4">Quick Actions</h2>
-        <div class="flex space-x-4">
-            <button class="bg-[#00D4B8] text-black font-semibold py-2 px-6 rounded-full hover:bg-[#00b89c]">
-                Refresh Predictions
-            </button>
-            <button class="bg-[#00D4B8] text-black font-semibold py-2 px-6 rounded-full hover:bg-[#00b89c]">
-                Download Report
-            </button>
+        <div class="performance-chart">
+            <h3>Model Performance Chart</h3>
+            {% if chart_data %}
+            <img src="data:image/png;base64,{{ chart_data }}" alt="Model Performance Chart">
+            {% else %}
+            <p>No performance chart available.</p>
+            {% endif %}
         </div>
-    </section>
 
-    <!-- Prediction System Section -->
-    <section class="max-w-4xl w-full px-4 mb-12">
-        <h2 class="text-2xl font-semibold mb-4">Advanced Weekly Prediction System</h2>
-        <div class="bg-[#1a1a1a] p-6 rounded-lg">
-            <h3 class="text-xl font-semibold mb-2">Weekly Prediction Features</h3>
-            <ul class="list-disc list-inside mb-4">
+        <div class="quick-actions">
+            <h3>Quick Actions</h3>
+            <a href="/api/predict">Refresh Predictions</a>
+            <a href="/api/download-report">Download Report</a>
+        </div>
+
+        <div class="model-info">
+            <h3>Advanced Weekly Prediction System</h3>
+            <h4>Weekly Prediction Features</h4>
+            <ul>
                 <li>7-Day Forecast: Complete daily predictions for the next week, including weekends and market holidays</li>
                 <li>Volatility Analysis: Real-time volatility calculations to assess market uncertainty and risk</li>
                 <li>Trend Detection: Advanced momentum indicators to identify bullish or bearish market trends</li>
                 <li>Risk Assessment: Confidence intervals and prediction reliability metrics for each forecast</li>
             </ul>
-            <h3 class="text-xl font-semibold mb-2">Technical Indicators Used</h3>
-            <ul class="list-disc list-inside mb-4">
+            <h4>Technical Indicators Used</h4>
+            <ul>
                 <li>RSI (7 & 14 day)</li>
                 <li>Bollinger Bands</li>
                 <li>Moving Averages</li>
@@ -103,21 +142,18 @@
                 <li>Autocorrelation</li>
                 <li>Seasonal Patterns</li>
             </ul>
-            <h3 class="text-xl font-semibold mb-2">Machine Learning Architecture</h3>
+            <h4>Machine Learning Architecture</h4>
             <p>I employ XGBoost regression with optimized hyperparameters specifically tuned for financial time series prediction. The model is trained on over 3000 days of historical data with sophisticated feature engineering.</p>
         </div>
-    </section>
 
-    <!-- Model Performance Metrics Section -->
-    <section class="max-w-4xl w-full px-4 mb-12">
-        <h2 class="text-2xl font-semibold mb-4">Model Performance Metrics</h2>
-        <div class="bg-[#1a1a1a] p-6 rounded-lg">
+        <div class="model-performance">
+            <h3>Model Performance Metrics</h3>
             <p>R² Score: {{ metrics.r2_score }}</p>
             <p>MAE: {{ metrics.mae }}</p>
             <p>RMSE: {{ metrics.rmse }}</p>
             <p>Last Trained: {{ metrics.last_trained or 'N/A' }}</p>
             <p>Note: {{ metrics.note }}</p>
         </div>
-    </section>
+    </div>
 </body>
 </html>
