@@ -180,8 +180,8 @@ class GasPricePredictor:
         # Modèle optimisé pour les séries temporelles financières
         self.model = xgb.XGBRegressor(
             n_estimators=300,
-            max_depth=3,  # Faible pour éviter l'overfitting
-            learning_rate=0.03,  # Très faible pour un apprentissage stable
+            max_depth=5,  # Faible pour éviter l'overfitting
+            learning_rate=0.001,  # Très faible pour un apprentissage stable
             subsample=0.7,
             colsample_bytree=0.7,
             colsample_bylevel=0.7,
