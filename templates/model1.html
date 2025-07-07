@@ -1,582 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RainK – Natural Gas Price Prediction</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
-  <style>
-    :root {
-      --blue: #0066ff;
-      --dark: #0a0b0f;
-      --light: #f4f4f5;
-      --green: #10b981;
-      --red: #ef4444;
-      --yellow: #f59e0b;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    html, body {
-      font-family: 'Inter', sans-serif;
-      background: var(--dark);
-      color: white;
-      overflow-x: hidden;
-    }
-
-    #three-bg {
-      position: fixed;
-      inset: 0;
-      z-index: -10;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .header { text-align: center; margin-bottom: 3rem; padding-top: 2rem; }
-
-    .header h1 {
-      font-size: clamp(2rem, 5vw, 3rem);
-      font-weight: 800;
-      margin-bottom: 1rem;
-      background: linear-gradient(135deg, var(--blue), #00d4ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .header p {
-      font-size: 1.2rem;
-      color: #cbd5e1;
-      margin-bottom: 2rem;
-    }
-
-    .explanation-section {
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      padding: 2rem;
-      margin-bottom: 2rem;
-      backdrop-filter: blur(10px);
-    }
-
-    .explanation-section h2 {
-      color: var(--blue);
-      margin-bottom: 1.5rem;
-      font-size: 1.5rem;
-    }
-
-    .explanation-section h3 {
-      color: #00d4ff;
-      margin-bottom: 1rem;
-      margin-top: 2rem;
-      font-size: 1.2rem;
-    }
-
-    .explanation-section p {
-      line-height: 1.6;
-      margin-bottom: 1rem;
-      color: #cbd5e1;
-    }
-
-    .feature-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
-      margin: 2rem 0;
-    }
-
-    .feature-card {
-      background: rgba(30, 41, 59, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 15px;
-      padding: 1.5rem;
-    }
-
-    .feature-card h4 {
-      color: var(--green);
-      margin-bottom: 0.5rem;
-    }
-
-    .feature-card p {
-      font-size: 0.9rem;
-      color: #94a3b8;
-    }
-
-    .tech-stack {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin: 1rem 0;
-    }
-
-    .tech-item {
-      background: rgba(0, 102, 255, 0.2);
-      color: var(--blue);
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
-      font-size: 0.9rem;
-      font-weight: 600;
-    }
-
-    .prediction-card {
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      padding: 2rem;
-      margin-bottom: 2rem;
-      backdrop-filter: blur(10px);
-    }
-
-    .prediction-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-    }
-
-    .metric-card {
-      background: rgba(30, 41, 59, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 15px;
-      padding: 1.5rem;
-      text-align: center;
-    }
-
-    .metric-value {
-      font-size: 2rem;
-      font-weight: 800;
-      margin-bottom: 0.5rem;
-    }
-
-    .metric-label {
-      font-size: 0.9rem;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .positive { color: var(--green); }
-    .negative { color: var(--red); }
-    .neutral { color: var(--yellow); }
-
-    .loading {
-      text-align: center;
-      padding: 2rem;
-      color: #64748b;
-    }
-
-    .loading::after {
-      content: '';
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 2px solid #64748b;
-      border-top: 2px solid var(--blue);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-left: 10px;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .error {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #fecaca;
-      padding: 1rem;
-      border-radius: 10px;
-      margin-bottom: 1rem;
-    }
-
-    .btn {
-      display: inline-block;
-      padding: 12px 24px;
-      font-weight: 600;
-      font-size: 1rem;
-      background: linear-gradient(135deg, var(--blue), #0038ff);
-      color: white;
-      border: none;
-      border-radius: 25px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: 0.3s ease;
-      margin: 0.5rem;
-    }
-
-    .btn:hover {
-      box-shadow: 0 8px 25px rgba(0, 102, 255, 0.4);
-      transform: translateY(-2px);
-    }
-
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .actions {
-      text-align: center;
-      margin-top: 2rem;
-    }
-
-    .last-updated {
-      font-size: 0.9rem;
-      color: #64748b;
-      text-align: center;
-      margin-top: 1rem;
-    }
-
-    /* Modal styles */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(5px);
-    }
-
-    .modal-content {
-      background: rgba(15, 23, 42, 0.95);
-      margin: 5% auto;
-      padding: 2rem;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      width: 90%;
-      max-width: 500px;
-      position: relative;
-    }
-
-    .close {
-      color: #aaa;
-      float: right;
-      font-size: 28px;
-      font-weight: bold;
-      cursor: pointer;
-      position: absolute;
-      right: 20px;
-      top: 15px;
-    }
-
-    .close:hover {
-      color: white;
-    }
-
-    .modal h2 {
-      margin-bottom: 1rem;
-      color: var(--blue);
-    }
-
-    .modal-metrics {
-      display: grid;
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-
-    .modal-metric {
-      display: flex;
-      justify-content: space-between;
-      padding: 0.5rem;
-      background: rgba(30, 41, 59, 0.6);
-      border-radius: 8px;
-    }
-
-    @media (max-width: 768px) {
-      .prediction-grid { grid-template-columns: 1fr; }
-      .feature-grid { grid-template-columns: 1fr; }
-      .container { padding: 10px; }
-      .modal-content { width: 95%; margin: 10% auto; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RainK - Natural Gas Price Prediction</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <div id="three-bg"></div>
+<body class="bg-gray-100 font-sans">
+    <header class="bg-blue-600 text-white p-4">
+        <div class="container mx-auto">
+            <h1 class="text-3xl font-bold">RainK</h1>
+            <p class="text-lg">Advanced Natural Gas Weekly Price Prediction</p>
+        </div>
+    </header>
 
-  <div class="container">
-    <div class="header">
-      <h1>Natural Gas Price Prediction System</h1>
-      <p>Advanced Machine Learning Model using XGBoost and EIA Data</p>
+    <div class="container mx-auto p-6">
+        <!-- Error Message -->
+        {% if error %}
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <!-- Current Price Section -->
+        <section class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Current Natural Gas Price ($/MMBtu)</h2>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <p class="text-xl">Current Price: ${{ current_price }}</p>
+                <p>Predicted Price ({{ prediction_date }}): ${{ predicted_price }}</p>
+                <p>Price Change: ${{ price_change }} ({{ price_change_pct }}%)</p>
+            </div>
+        </section>
+
+        <!-- Weekly Predictions -->
+        <section class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">7-Day Price Forecast</h2>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="p-2">Date</th>
+                            <th class="p-2">Day</th>
+                            <th class="p-2">Predicted Price ($)</th>
+                            <th class="p-2">Price Change ($)</th>
+                            <th class="p-2">Change (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="weekly-predictions">
+                        {% for pred in weekly_predictions %}
+                        <tr>
+                            <td class="p-2">{{ pred.date }}</td>
+                            <td class="p-2">{{ pred.day_name }}</td>
+                            <td class="p-2">${{ pred.predicted_price }}</td>
+                            <td class="p-2">${{ pred.price_change_from_current }}</td>
+                            <td class="p-2">{{ pred.price_change_pct_from_current }}%</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="mt-4">
+                    <p><strong>Weekly Summary:</strong></p>
+                    <p>Week Start Price: ${{ weekly_summary.week_start_price }}</p>
+                    <p>Week End Price: ${{ weekly_summary.week_end_price }}</p>
+                    <p>Total Change: ${{ weekly_summary.total_change }} ({{ weekly_summary.total_change_pct }}%)</p>
+                    <p>Max Price: ${{ weekly_summary.max_price }}</p>
+                    <p>Min Price: ${{ weekly_summary.min_price }}</p>
+                    <p>Average Price: ${{ weekly_summary.avg_price }}</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Quick Actions</h2>
+            <div class="flex space-x-4">
+                <button id="refresh-btn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">🔄 Refresh Predictions</button>
+                <a id="download-btn" href="/api/download-report" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">📊 Download Report</a>
+            </div>
+        </section>
+
+        <!-- How It Works -->
+        <section class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Advanced Weekly Prediction System</h2>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <p>Our system uses cutting-edge machine learning to predict natural gas prices for the upcoming week, providing traders and analysts with valuable insights for decision-making.</p>
+                <div class="mt-4">
+                    <h3 class="text-xl font-semibold">Weekly Prediction Features</h3>
+                    <ul class="list-disc pl-5">
+                        <li><strong>7-Day Forecast:</strong> Complete daily predictions for the next week, including weekends and market holidays</li>
+                        <li><strong>Volatility Analysis:</strong> Real-time volatility calculations to assess market uncertainty and risk</li>
+                        <li><strong>Trend Detection:</strong> Advanced momentum indicators to identify bullish or bearish market trends</li>
+                        <li><strong>Risk Assessment:</strong> Confidence intervals and prediction reliability metrics for each forecast</li>
+                    </ul>
+                </div>
+                <div class="mt-4">
+                    <h3 class="text-xl font-semibold">Technical Indicators Used</h3>
+                    <ul class="list-disc pl-5">
+                        <li>RSI (7 & 14 day)</li>
+                        <li>Bollinger Bands</li>
+                        <li>Moving Averages</li>
+                        <li>Volatility Measures</li>
+                        <li>Momentum Indicators</li>
+                        <li>Autocorrelation</li>
+                        <li>Seasonal Patterns</li>
+                    </ul>
+                </div>
+                <div class="mt-4">
+                    <h3 class="text-xl font-semibold">Machine Learning Architecture</h3>
+                    <p>We employ XGBoost regression with optimized hyperparameters specifically tuned for financial time series prediction. The model is trained on over 3000 days of historical data with sophisticated feature engineering.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Model Performance Metrics -->
+        <section class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Model Performance Metrics</h2>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <p>R² Score: {{ metrics.r2_score }}</p>
+                <p>MAE: {{ metrics.mae }}</p>
+                <p>RMSE: {{ metrics.rmse }}</p>
+                <p>Last Trained: {{ metrics.last_trained or 'N/A' }}</p>
+                <p>Note: {{ metrics.note }}</p>
+            </div>
+        </section>
     </div>
 
-    <div class="explanation-section">
-      <h2>About This Prediction Model</h2>
-      <p>
-        This system utilizes a sophisticated machine learning approach to predict natural gas prices based on historical data and technical indicators. The model leverages XGBoost regression with carefully engineered features to forecast next-day price movements.
-      </p>
+    <script>
+        document.getElementById('refresh-btn').addEventListener('click', async () => {
+            try {
+                // Fetch predictions
+                const predictResponse = await fetch('/api/predict');
+                const predictData = await predictResponse.json();
+                if (!predictData.success) {
+                    alert('Error refreshing predictions: ' + predictData.error);
+                    return;
+                }
 
-      <h3>Data Source</h3>
-      <p>
-        The model fetches real-time data from the U.S. Energy Information Administration (EIA) API, specifically focusing on natural gas futures prices. This ensures our predictions are based on the most current and authoritative energy market data available.
-      </p>
+                // Update current price section
+                document.querySelector('.bg-white.p-6.rounded-lg.shadow-md').innerHTML = `
+                    <p class="text-xl">Current Price: $${predictData.current_price}</p>
+                    <p>Predicted Price (${predictData.prediction_date}): $${predictData.predicted_price}</p>
+                    <p>Price Change: $${predictData.price_change} (${predictData.price_change_pct}%)</p>
+                `;
 
-      <h3>Technical Features Used</h3>
-      <div class="feature-grid">
-        <div class="feature-card">
-          <h4>Price Returns</h4>
-          <p>Multi-period returns (1, 2, 3, 5, 10 days) to capture short-term price momentum and trends</p>
-        </div>
-        <div class="feature-card">
-          <h4>Volatility Measures</h4>
-          <p>Rolling volatility calculations over 5, 10, and 20-day windows to assess market uncertainty</p>
-        </div>
-        <div class="feature-card">
-          <h4>Technical Indicators</h4>
-          <p>RSI (Relative Strength Index) and Bollinger Bands to identify overbought/oversold conditions</p>
-        </div>
-        <div class="feature-card">
-          <h4>Momentum Features</h4>
-          <p>Multi-timeframe momentum indicators to capture directional price movements</p>
-        </div>
-        <div class="feature-card">
-          <h4>Moving Averages</h4>
-          <p>Price relationships to various moving averages to identify trend strength</p>
-        </div>
-        <div class="feature-card">
-          <h4>Seasonal Patterns</h4>
-          <p>Day-of-week, monthly, and quarterly patterns to capture cyclical market behavior</p>
-        </div>
-      </div>
+                // Update weekly predictions table
+                const tbody = document.getElementById('weekly-predictions');
+                tbody.innerHTML = predictData.weekly_predictions.map(pred => `
+                    <tr>
+                        <td class="p-2">${pred.date}</td>
+                        <td class="p-2">${pred.day_name}</td>
+                        <td class="p-2">$${pred.predicted_price}</td>
+                        <td class="p-2">$${pred.price_change_from_current}</td>
+                        <td class="p-2">${pred.price_change_pct_from_current}%</td>
+                    </tr>
+                `).join('');
 
-      <h3>Model Architecture</h3>
-      <p>
-        The prediction system employs XGBoost (Extreme Gradient Boosting) with optimized hyperparameters specifically tuned for financial time series data. The model predicts percentage returns rather than absolute prices, which provides better stability and accuracy for volatile commodity markets.
-      </p>
+                // Update weekly summary
+                document.querySelector('.bg-white.p-6.rounded-lg.shadow-md .mt-4').innerHTML = `
+                    <p><strong>Weekly Summary:</strong></p>
+                    <p>Week Start Price: $${predictData.weekly_summary.week_start_price}</p>
+                    <p>Week End Price: $${predictData.weekly_summary.week_end_price}</p>
+                    <p>Total Change: $${predictData.weekly_summary.total_change} (${predictData.weekly_summary.total_change_pct}%)</p>
+                    <p>Max Price: $${predictData.weekly_summary.max_price}</p>
+                    <p>Min Price: $${predictData.weekly_summary.min_price}</p>
+                    <p>Average Price: $${predictData.weekly_summary.avg_price}</p>
+                `;
 
-      <h3>Technology Stack</h3>
-      <div class="tech-stack">
-        <span class="tech-item">Python</span>
-        <span class="tech-item">XGBoost</span>
-        <span class="tech-item">Pandas</span>
-        <span class="tech-item">NumPy</span>
-        <span class="tech-item">Scikit-learn</span>
-        <span class="tech-item">EIA API</span>
-      </div>
-
-      <h3>Model Performance</h3>
-      <p>
-        The model is trained on historical data spanning multiple years and employs temporal validation to ensure robust performance. It uses regularization techniques to prevent overfitting and incorporates early stopping to optimize generalization. Performance metrics include R-squared score, Mean Absolute Error (MAE), and Root Mean Square Error (RMSE).
-      </p>
-    </div>
-
-    <div class="prediction-card">
-      <h2 style="color: var(--blue); margin-bottom: 1.5rem;">Current Prediction</h2>
-      <div id="loading" class="loading">Loading prediction data...</div>
-      <div id="error" class="error" style="display: none;"></div>
-      <div id="prediction-content" style="display: none;">
-        <div class="prediction-grid">
-          <div class="metric-card">
-            <div class="metric-value" id="current-price">-</div>
-            <div class="metric-label">Current Price ($)</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-value" id="predicted-price">-</div>
-            <div class="metric-label">Predicted Price ($)</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-value" id="price-change">-</div>
-            <div class="metric-label">Price Change ($)</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-value" id="price-change-pct">-</div>
-            <div class="metric-label">Change Percentage</div>
-          </div>
-        </div>
-        <div class="last-updated" id="last-updated">Last updated: -</div>
-      </div>
-    </div>
-
-    <div class="actions">
-      <button class="btn" onclick="loadPrediction()">Refresh Prediction</button>
-      <button class="btn btn-secondary" onclick="showModelInfo()">Model Metrics</button>
-      <a href="/" class="btn btn-secondary">Back to Home</a>
-    </div>
-  </div>
-
-  <!-- Modal for Model Info -->
-  <div id="modelModal" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeModal()">&times;</span>
-      <h2>Model Performance Metrics</h2>
-      <div id="modal-loading" class="loading">Loading metrics...</div>
-      <div id="modal-error" class="error" style="display: none;"></div>
-      <div id="modal-metrics" class="modal-metrics" style="display: none;">
-        <div class="modal-metric">
-          <span><strong>R² Score:</strong></span>
-          <span id="r2-score">-</span>
-        </div>
-        <div class="modal-metric">
-          <span><strong>MAE (Mean Absolute Error):</strong></span>
-          <span id="mae">-</span>
-        </div>
-        <div class="modal-metric">
-          <span><strong>RMSE (Root Mean Square Error):</strong></span>
-          <span id="rmse">-</span>
-        </div>
-        <div class="modal-metric">
-          <span><strong>Last Training:</strong></span>
-          <span id="last-trained">-</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    let scene, camera, renderer, mountain;
-
-    function initThree() {
-      const container = document.getElementById('three-bg');
-      scene = new THREE.Scene();
-      camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 100);
-      camera.position.set(0, 2, 8);
-      renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      container.appendChild(renderer.domElement);
-      scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-      const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      dirLight.position.set(5, 10, 7.5);
-      scene.add(dirLight);
-      const geometry = new THREE.PlaneGeometry(30, 15, 128, 128);
-      geometry.rotateX(-Math.PI / 2);
-      const pos = geometry.attributes.position;
-      for (let i = 0; i < pos.count; i++) {
-        const x = pos.getX(i);
-        const z = pos.getZ(i);
-        const y = Math.sin(x * 0.3) * Math.cos(z * 0.4) * 2 + Math.random() * 0.5;
-        pos.setY(i, y);
-      }
-      geometry.attributes.position.needsUpdate = true;
-      const material = new THREE.MeshStandardMaterial({
-        color: 0x1f2937,
-        roughness: 0.8,
-        metalness: 0.1,
-        flatShading: true
-      });
-      mountain = new THREE.Mesh(geometry, material);
-      mountain.position.y = -1;
-      scene.add(mountain);
-      animate();
-    }
-
-    function animate() {
-      requestAnimationFrame(animate);
-      if (mountain) mountain.rotation.z += 0.0003;
-      renderer.render(scene, camera);
-    }
-
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-
-    async function loadPrediction() {
-      const loading = document.getElementById('loading');
-      const error = document.getElementById('error');
-      const content = document.getElementById('prediction-content');
-      loading.style.display = 'block';
-      error.style.display = 'none';
-      content.style.display = 'none';
-
-      try {
-        const response = await fetch('/api/predict');
-        const data = await response.json();
-        if (data.success) {
-          const format = (val, decimals = 4) => val != null ? val.toFixed(decimals) : '-';
-          document.getElementById('current-price').textContent = format(data.current_price);
-          document.getElementById('predicted-price').textContent = format(data.predicted_price);
-
-          const change = data.price_change != null ? data.price_change : 0;
-          const pct = data.price_change_pct != null ? data.price_change_pct : 0;
-
-          const changeElem = document.getElementById('price-change');
-          const pctElem = document.getElementById('price-change-pct');
-
-          changeElem.textContent = (change >= 0 ? '+' : '') + change.toFixed(4);
-          pctElem.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
-
-          changeElem.className = 'metric-value ' + (change >= 0 ? 'positive' : 'negative');
-          pctElem.className = 'metric-value ' + (change >= 0 ? 'positive' : 'negative');
-
-          document.getElementById('last-updated').textContent =
-            data.last_updated ? 'Last updated: ' + new Date(data.last_updated).toLocaleString('en-US')
-                              : 'Last updated: unknown';
-
-          loading.style.display = 'none';
-          content.style.display = 'block';
-        } else {
-          throw new Error(data.error || 'Unknown error');
-        }
-      } catch (err) {
-        loading.style.display = 'none';
-        error.style.display = 'block';
-        error.textContent = `Error: ${err.message}`;
-      }
-    }
-
-    async function showModelInfo() {
-      const modal = document.getElementById('modelModal');
-      const loading = document.getElementById('modal-loading');
-      const error = document.getElementById('modal-error');
-      const metrics = document.getElementById('modal-metrics');
-      
-      // Show modal
-      modal.style.display = 'block';
-      loading.style.display = 'block';
-      error.style.display = 'none';
-      metrics.style.display = 'none';
-
-      try {
-        const response = await fetch('/api/model-performance');
-        const data = await response.json();
-        
-        if (data.success) {
-          // Update metrics
-          document.getElementById('r2-score').textContent = data.metrics.r2_score || '-';
-          document.getElementById('mae').textContent = data.metrics.mae || '-';
-          document.getElementById('rmse').textContent = data.metrics.rmse || '-';
-          document.getElementById('last-trained').textContent = data.metrics.last_trained || 'Not available';
-          
-          loading.style.display = 'none';
-          metrics.style.display = 'block';
-        } else {
-          throw new Error(data.error || 'Unknown error');
-        }
-      } catch (err) {
-        loading.style.display = 'none';
-        error.style.display = 'block';
-        error.textContent = `Error: ${err.message}`;
-      }
-    }
-
-    function closeModal() {
-      document.getElementById('modelModal').style.display = 'none';
-    }
-
-    // Close modal when clicking outside
-    window.onclick = function(event) {
-      const modal = document.getElementById('modelModal');
-      if (event.target === modal) {
-        modal.style.display = 'none';
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      initThree();
-      loadPrediction();
-    });
-  </script>
+                // Fetch model performance metrics
+                const metricsResponse = await fetch('/api/model-performance');
+                const metricsData = await metricsResponse.json();
+                if (metricsData.success) {
+                    document.querySelector('.bg-white.p-6.rounded-lg.shadow-md:last-of-type').innerHTML = `
+                        <p>R² Score: ${metricsData.metrics.r2_score}</p>
+                        <p>MAE: ${metricsData.metrics.mae}</p>
+                        <p>RMSE: ${metricsData.metrics.rmse}</p>
+                        <p>Last Trained: ${metricsData.metrics.last_trained || 'N/A'}</p>
+                        <p>Note: ${metricsData.metrics.note}</p>
+                    `;
+                }
+            } catch (error) {
+                alert('Error refreshing predictions: ' + error.message);
+            }
+        });
+    </script>
 </body>
 </html>
