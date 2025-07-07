@@ -272,6 +272,82 @@ class GasPricePredictor:
             'prediction_date': (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
         }
     
+    def get_weekly_prediction(self):
+        """Obtient les prédictions pour la semaine prochaine (7 jours)"""
+        if self.model is None:
+            self.train_model()
+        
+        # Récupérer les données récentes
+        df = self.fetch_gas_data(days=150)
+        df = self.add_features(df)
+        
+        # Nettoyer et préparer
+        df = df.dropna(subset=self.feature_cols)
+        
+        if len(df) == 0:
+            raise ValueError("Pas de données disponibles pour la prédiction")
+        
+        # Obtenir le dernier prix connu
+        current_price = df['Price'].iloc[-1]
+        current_date = df['date'].iloc[-1]
+        
+        # Prédictions pour 7 jours
+        predictions = []
+        temp_df = df.copy()
+        
+        for day in range(1, 8):
+            # Prédire le rendement pour le jour suivant
+            X_latest = temp_df[self.feature_cols].iloc[[-1]]
+            X_latest_scaled = self.scaler.transform(X_latest)
+            
+            predicted_return = self.model.predict(X_latest_scaled)[0]
+            
+            # Calculer le prix prédit
+            last_price = temp_df['Price'].iloc[-1]
+            predicted_price = last_price * (1 + predicted_return)
+            
+            # Vérifier les valeurs
+            if pd.isna(predicted_price) or np.isinf(predicted_price):
+                predicted_price = last_price
+                predicted_return = 0
+            
+            prediction_date = current_date + timedelta(days=day)
+            
+            predictions.append({
+                'date': prediction_date.strftime('%Y-%m-%d'),
+                'day_name': prediction_date.strftime('%A'),
+                'predicted_price': round(float(predicted_price), 4),
+                'predicted_return': round(float(predicted_return * 100), 2),
+                'price_change_from_current': round(float(predicted_price - current_price), 4),
+                'price_change_pct_from_current': round(float((predicted_price - current_price) / current_price * 100), 2)
+            })
+            
+            # Mettre à jour le DataFrame temporaire avec la nouvelle prédiction
+            # Pour cela, on simule l'ajout d'une nouvelle ligne avec le prix prédit
+            new_row = temp_df.iloc[[-1]].copy()
+            new_row['date'] = prediction_date
+            new_row['Price'] = predicted_price
+            
+            # Recalculer les features pour cette nouvelle ligne
+            temp_df = pd.concat([temp_df, new_row], ignore_index=True)
+            temp_df = self.add_features(temp_df)
+            temp_df = temp_df.dropna(subset=self.feature_cols)
+        
+        # Calculer les statistiques de la semaine
+        weekly_stats = {
+            'current_price': round(float(current_price), 4),
+            'week_start_price': predictions[0]['predicted_price'],
+            'week_end_price': predictions[-1]['predicted_price'],
+            'total_change': round(float(predictions[-1]['predicted_price'] - current_price), 4),
+            'total_change_pct': round(float((predictions[-1]['predicted_price'] - current_price) / current_price * 100), 2),
+            'max_price': round(max([p['predicted_price'] for p in predictions]), 4),
+            'min_price': round(min([p['predicted_price'] for p in predictions]), 4),
+            'avg_price': round(sum([p['predicted_price'] for p in predictions]) / len(predictions), 4),
+            'predictions': predictions
+        }
+        
+        return weekly_stats
+    
     def get_model_metrics(self):
         """Retourne les métriques de test"""
         if self.model is None or self.scaler is None or self.feature_cols is None:
