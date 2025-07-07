@@ -20,10 +20,11 @@ def landing():
 @app.route("/model1")
 def model1():
     try:
-        # Get predictions and metrics
+        # Get predictions, metrics, and performance chart
         prediction = predictor.get_prediction()
         weekly_stats = predictor.get_weekly_prediction()
         metrics = predictor.get_model_metrics()
+        chart_data = predictor.get_performance_chart()  # Get base64-encoded chart
 
         # Prepare data for template
         return render_template(
@@ -44,6 +45,7 @@ def model1():
                 'avg_price': weekly_stats['avg_price']
             },
             metrics=metrics,
+            chart_data=chart_data,  # Pass chart data to template
             error=None
         )
     except Exception as e:
@@ -58,7 +60,8 @@ def model1():
             weekly_predictions=[],
             weekly_summary={},
             metrics={'r2_score': 'N/A', 'mae': 'N/A', 'rmse': 'N/A', 'last_trained': 'N/A'},
-            error=f"Error loading predictions: {str(e)}"
+            chart_data=None,  # Pass None if chart generation fails
+            error=f"Error loading predictions or chart: {str(e)}"
         )
 
 @app.route("/api/predict", methods=['GET'])

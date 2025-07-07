@@ -9,6 +9,10 @@ from sklearn.preprocessing import StandardScaler
 import xgboost as xgb
 import warnings
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+from io import BytesIO
+import base64
 warnings.filterwarnings('ignore')
 
 class GasPricePredictor:
@@ -19,6 +23,7 @@ class GasPricePredictor:
         self.feature_cols = None
         self.last_update = None
         self.cache_duration = 3600  # 1 heure en secondes
+        self.test_data = None  # Stocker les données de test pour le graphique
         
         # Charger le modèle pré-entraîné s'il existe
         self.load_model()
@@ -195,6 +200,38 @@ class GasPricePredictor:
             verbose=False
         )
         
+        # Prédictions sur le test set
+        y_pred = self.model.predict(X_test_scaled)
+        
+        # Reconstruire les prix à partir des rendements prédits
+        test_prices_actual = []
+        test_prices_predicted = []
+        
+        # Prix de départ (dernier prix avant le test set)
+        start_price = train_df['Price'].iloc[-1]
+        current_actual = start_price
+        current_predicted = start_price
+        
+        for i in range(len(y_test)):
+            # Prix réel suivant
+            actual_return = y_test.iloc[i]
+            current_actual = current_actual * (1 + actual_return)
+            test_prices_actual.append(current_actual)
+            
+            # Prix prédit suivant
+            predicted_return = y_pred[i]
+            current_predicted = current_predicted * (1 + predicted_return)
+            test_prices_predicted.append(current_predicted)
+        
+        # Stocker les données de test pour le graphique
+        self.test_data = {
+            'dates': test_df['date'].tolist(),
+            'actual_prices': test_prices_actual,
+            'predicted_prices': test_prices_predicted,
+            'actual_returns': y_test.tolist(),
+            'predicted_returns': y_pred.tolist()
+        }
+        
         # Calcul des métriques sur le test set
         self.test_metrics = self.calculate_validation_metrics(X_test_scaled, y_test)
         self.save_model()
@@ -224,6 +261,74 @@ class GasPricePredictor:
             'mae': round(float(mae), 4),
             'rmse': round(float(rmse), 4)
         }
+    
+    def get_performance_chart(self):
+        """Génère un graphique de performance du modèle sur le test set"""
+        if not self.test_data:
+            raise ValueError("Données de test non disponibles. Veuillez d'abord entraîner le modèle.")
+        
+        # Configurer matplotlib pour un style sombre
+        plt.style.use('dark_background')
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10))
+        fig.patch.set_facecolor('#1a1a1a')
+        
+        # Graphique 1: Comparaison des prix
+        dates = pd.to_datetime(self.test_data['dates'])
+        ax1.plot(dates, self.test_data['actual_prices'], 
+                label='Prix Réels', color='#60a5fa', linewidth=2)
+        ax1.plot(dates, self.test_data['predicted_prices'], 
+                label='Prix Prédits', color='#f59e0b', linewidth=2, linestyle='--')
+        
+        ax1.set_title('Performance du Modèle - Prix du Gaz Naturel (Test Set)', 
+                     fontsize=14, fontweight='bold', color='white')
+        ax1.set_xlabel('Date', fontsize=12, color='white')
+        ax1.set_ylabel('Prix ($/MMBtu)', fontsize=12, color='white')
+        ax1.legend(fontsize=10)
+        ax1.grid(True, alpha=0.3)
+        ax1.tick_params(colors='white')
+        
+        # Formater les dates sur l'axe x
+        ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+        ax1.xaxis.set_major_locator(mdates.MonthLocator(interval=2))
+        plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45)
+        
+        # Graphique 2: Scatter plot des rendements
+        ax2.scatter(self.test_data['actual_returns'], self.test_data['predicted_returns'], 
+                   alpha=0.6, color='#60a5fa', s=20)
+        
+        # Ligne de régression parfaite
+        min_val = min(min(self.test_data['actual_returns']), min(self.test_data['predicted_returns']))
+        max_val = max(max(self.test_data['actual_returns']), max(self.test_data['predicted_returns']))
+        ax2.plot([min_val, max_val], [min_val, max_val], 'r--', alpha=0.8, linewidth=2)
+        
+        ax2.set_title('Rendements Prédits vs Réels', fontsize=14, fontweight='bold', color='white')
+        ax2.set_xlabel('Rendements Réels', fontsize=12, color='white')
+        ax2.set_ylabel('Rendements Prédits', fontsize=12, color='white')
+        ax2.grid(True, alpha=0.3)
+        ax2.tick_params(colors='white')
+        
+        # Ajouter les métriques au graphique
+        r2_score = self.test_metrics.get('r2_score', 'N/A')
+        mae = self.test_metrics.get('mae', 'N/A')
+        rmse = self.test_metrics.get('rmse', 'N/A')
+        
+        textstr = f'R² = {r2_score}\nMAE = {mae}\nRMSE = {rmse}'
+        props = dict(boxstyle='round', facecolor='#1a1a1a', alpha=0.8)
+        ax2.text(0.05, 0.95, textstr, transform=ax2.transAxes, fontsize=10,
+                verticalalignment='top', bbox=props, color='white')
+        
+        plt.tight_layout()
+        
+        # Convertir en base64 pour l'affichage web
+        buffer = BytesIO()
+        plt.savefig(buffer, format='png', facecolor='#1a1a1a', 
+                   bbox_inches='tight', dpi=100)
+        buffer.seek(0)
+        
+        chart_data = base64.b64encode(buffer.getvalue()).decode()
+        plt.close()
+        
+        return chart_data
     
     def get_prediction(self):
         """Obtient la prédiction pour le lendemain"""
@@ -376,7 +481,8 @@ class GasPricePredictor:
             'scaler': self.scaler,
             'feature_cols': self.feature_cols,
             'last_update': datetime.now().isoformat(),
-            'test_metrics': getattr(self, 'test_metrics', {})
+            'test_metrics': getattr(self, 'test_metrics', {}),
+            'test_data': getattr(self, 'test_data', {})
         }
         
         with open('gas_price_model.pkl', 'wb') as f:
@@ -393,6 +499,7 @@ class GasPricePredictor:
             self.feature_cols = model_data['feature_cols']
             self.last_update = model_data.get('last_update')
             self.test_metrics = model_data.get('test_metrics', {})
+            self.test_data = model_data.get('test_data', {})
             
             print("Modèle chargé avec succès!")
             
