@@ -27,9 +27,8 @@ class GasPricePredictor:
         self.test_data = None
         self.load_model()
 
-    def fetch_gas_data(self, days=300):
+    def fetch_gas_data(self, days=3000):
         """Fetch gas price data from EIA and options data from Yahoo Finance"""
-        # Fetch EIA price data
         if not self.api_key:
             raise ValueError("Clé API EIA manquante")
         
@@ -72,26 +71,21 @@ class GasPricePredictor:
             options_data = []
             for date in df["date"]:
                 try:
-                    # Get options chain for the nearest expiration after the date
                     exp_dates = ticker.options
                     if not exp_dates:
                         continue
-                    # Select the front-month expiration
                     exp_date = min([pd.to_datetime(exp) for exp in exp_dates if pd.to_datetime(exp) >= date])
                     opt_chain = ticker.option_chain(exp_date.strftime('%Y-%m-%d'))
                     
-                    # Get underlying price (close price for the date)
                     hist = ticker.history(start=date, end=date + timedelta(days=1))
                     if hist.empty:
                         continue
                     underlying_price = hist["Close"].iloc[0]
                     
-                    # Find ATM strike
                     calls = opt_chain.calls
                     puts = opt_chain.puts
                     atm_strike = calls["strike"].iloc[(calls["strike"] - underlying_price).abs().idxmin()]
                     
-                    # Get ATM call and put prices
                     call_price = calls[calls["strike"] == atm_strike]["lastPrice"].iloc[0] if not calls[calls["strike"] == atm_strike].empty else np.nan
                     put_price = puts[puts["strike"] == atm_strike]["lastPrice"].iloc[0] if not puts[puts["strike"] == atm_strike].empty else np.nan
                     
@@ -106,10 +100,8 @@ class GasPricePredictor:
             
             options_df = pd.DataFrame(options_data)
             options_df["date"] = pd.to_datetime(options_df["date"])
-            # Interpolate missing options prices
             options_df[["call_price", "put_price", "underlying_price"]] = options_df[["call_price", "put_price", "underlying_price"]].interpolate(method="linear").fillna(method="ffill").fillna(method="bfill")
             
-            # Merge with price data
             df = df.merge(options_df, on="date", how="left")
             
             return df
@@ -119,7 +111,6 @@ class GasPricePredictor:
 
     def add_features(self, df):
         """Add technical and options-based features"""
-        # Technical features
         df['return_1d'] = df['Price'].pct_change(1).shift(1)
         df['return_2d'] = df['Price'].pct_change(2).shift(1)
         df['return_3d'] = df['Price'].pct_change(3).shift(1)
@@ -153,11 +144,10 @@ class GasPricePredictor:
         
         df['vol_momentum'] = df['volatility_10d'] * df['momentum_5d']
         
-        # Options-based features
-        df['call_put_ratio'] = (df['call_price'] / df['put_price']).shift(1)  # Ratio of call to put prices
-        df['call_put_diff'] = (df['call_price'] - df['put_price']).shift(1)  # Difference in premiums
-        df['call_price_norm'] = (df['call_price'] / df['underlying_price']).shift(1)  # Normalized call price
-        df['put_price_norm'] = (df['put_price'] / df['underlying_price']).shift(1)  # Normalized put price
+        df['call_put_ratio'] = (df['call_price'] / df['put_price']).shift(1)
+        df['call_put_diff'] = (df['call_price'] - df['put_price']).shift(1)
+        df['call_price_norm'] = (df['call_price'] / df['underlying_price']).shift(1)
+        df['put_price_norm'] = (df['put_price'] / df['underlying_price']).shift(1)
         
         return df
 
@@ -171,7 +161,7 @@ class GasPricePredictor:
         return rsi
 
     def train_model(self, retrain=False):
-        """Train model with cross-validation and optimized hyperparameters"""
+        """Train model to predict prices directly with cross-validation"""
         if self.model is not None and not retrain:
             return
         
@@ -180,7 +170,8 @@ class GasPricePredictor:
         df = self.fetch_gas_data(days=5000)
         df = self.add_features(df)
         
-        df['target'] = df['Price'].pct_change(1).shift(-1)
+        # Target: Next day's price
+        df['target'] = df['Price'].shift(-1)
         self.feature_cols = [col for col in df.columns if col not in ['date', 'Price', 'target', 'call_price', 'put_price', 'underlying_price']]
         df = df.dropna(subset=['target'] + self.feature_cols)
         
@@ -260,28 +251,16 @@ class GasPricePredictor:
         y_pred = self.model.predict(X_test_scaled)
         y_pred = pd.Series(y_pred).rolling(window=3, min_periods=1).mean().values
         
-        test_prices_actual = []
-        test_prices_predicted = []
-        start_price = train_df['Price'].iloc[-1]
-        current_actual = start_price
-        current_predicted = start_price
-        
-        for i in range(len(y_test)):
-            actual_return = y_test.iloc[i]
-            current_actual = current_actual * (1 + actual_return)
-            test_prices_actual.append(current_actual)
-            
-            predicted_return = y_pred[i]
-            predicted_return = np.clip(predicted_return, -0.1, 0.1)
-            current_predicted = current_predicted * (1 + predicted_return)
-            test_prices_predicted.append(current_predicted)
+        # Calculate returns for visualization
+        actual_returns = test_df['Price'].pct_change(1).shift(-1).iloc[:-1].values
+        predicted_returns = (y_pred[1:] - test_df['Price'].iloc[:-1].values) / test_df['Price'].iloc[:-1].values
         
         self.test_data = {
-            'dates': test_df['date'].tolist(),
-            'actual_prices': test_prices_actual,
-            'predicted_prices': test_prices_predicted,
-            'actual_returns': y_test.tolist(),
-            'predicted_returns': y_pred.tolist()
+            'dates': test_df['date'].tolist()[:-1],  # Adjust for returns
+            'actual_prices': y_test.tolist()[:-1],
+            'predicted_prices': y_pred.tolist()[:-1],
+            'actual_returns': actual_returns.tolist(),
+            'predicted_returns': predicted_returns.tolist()
         }
         
         self.test_metrics = self.calculate_validation_metrics(X_test_scaled, y_test)
@@ -292,7 +271,7 @@ class GasPricePredictor:
         print("Feature Importance:", sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)[:5])
         
         print("Modèle entraîné avec succès!")
-        print(f"Métriques test: R²={self.test_metrics['r2_score']:.4f}, MAE={self.test_metrics['mae']:.4f}")
+        print(f"Métriques test: R²={self.test_metrics['r2_score']:.4f}, MAE={self.test_metrics['mae']:.4f}, Direction Accuracy={self.test_metrics['direction_accuracy']:.4f}")
 
     def calculate_validation_metrics(self, X_test_scaled, y_test):
         """Calculate metrics with direction accuracy"""
@@ -303,7 +282,10 @@ class GasPricePredictor:
         mae = mean_absolute_error(y_test, y_pred)
         mse = mean_squared_error(y_test, y_pred)
         rmse = np.sqrt(mse)
-        direction_accuracy = np.mean(np.sign(y_test) == np.sign(y_pred))
+        # Calculate direction accuracy based on price changes
+        actual_changes = y_test[1:] - y_test[:-1]
+        predicted_changes = y_pred[1:] - y_pred[:-1]
+        direction_accuracy = np.mean(np.sign(actual_changes) == np.sign(predicted_changes))
         
         if np.isnan(r2) or np.isinf(r2):
             r2 = 0.0
@@ -320,7 +302,7 @@ class GasPricePredictor:
         }
 
     def get_prediction(self):
-        """Get next-day prediction with clipped returns"""
+        """Get next-day price prediction"""
         if self.model is None:
             self.train_model()
         
@@ -334,14 +316,12 @@ class GasPricePredictor:
         X_latest = df[self.feature_cols].iloc[[-1]]
         X_latest_scaled = self.scaler.transform(X_latest)
         
-        predicted_return = self.model.predict(X_latest_scaled)[0]
-        predicted_return = np.clip(predicted_return, -0.1, 0.1)
+        predicted_price = self.model.predict(X_latest_scaled)[0]
+        predicted_price = np.clip(predicted_price, df['Price'].min(), df['Price'].max())  # Clip to historical range
         current_price = df['Price'].iloc[-1]
-        predicted_price = current_price * (1 + predicted_return)
         
         if np.isnan(predicted_price) or np.isinf(predicted_price):
             predicted_price = current_price
-            predicted_return = 0
         
         price_change = predicted_price - current_price
         price_change_pct = (price_change / current_price) * 100
@@ -356,7 +336,7 @@ class GasPricePredictor:
         }
 
     def get_weekly_prediction(self):
-        """Get weekly predictions with smoothed returns"""
+        """Get weekly price predictions"""
         if self.model is None:
             self.train_model()
         
@@ -376,15 +356,13 @@ class GasPricePredictor:
             X_latest = temp_df[self.feature_cols].iloc[[-1]]
             X_latest_scaled = self.scaler.transform(X_latest)
             
-            predicted_return = self.model.predict(X_latest_scaled)[0]
-            predicted_return = np.clip(predicted_return, -0.1, 0.1)
-            last_price = temp_df['Price'].iloc[-1]
-            predicted_price = last_price * (1 + predicted_return)
+            predicted_price = self.model.predict(X_latest_scaled)[0]
+            predicted_price = np.clip(predicted_price, df['Price'].min(), df['Price'].max())
             
             if np.isnan(predicted_price) or np.isinf(predicted_price):
-                predicted_price = last_price
-                predicted_return = 0
+                predicted_price = temp_df['Price'].iloc[-1]
             
+            predicted_return = (predicted_price - temp_df['Price'].iloc[-1]) / temp_df['Price'].iloc[-1]
             prediction_date = current_date + timedelta(days=day)
             
             predictions.append({
@@ -399,7 +377,6 @@ class GasPricePredictor:
             new_row = temp_df.iloc[[-1]].copy()
             new_row['date'] = prediction_date
             new_row['Price'] = predicted_price
-            # Assume options prices remain constant for future predictions
             new_row['call_price'] = temp_df['call_price'].iloc[-1]
             new_row['put_price'] = temp_df['put_price'].iloc[-1]
             new_row['underlying_price'] = temp_df['underlying_price'].iloc[-1]
