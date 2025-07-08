@@ -140,7 +140,8 @@ class GasPricePredictor:
                 raise ValueError("Pas de données disponibles pour la prédiction")
             
             current_price = df['Price'].iloc[-1]
-            current_date = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
+            current_date = date.today()
+
 
 
             drift, volatility = self.estimate_bsm_parameters(df)
