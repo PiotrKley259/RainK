@@ -1,14 +1,17 @@
-from flask import Flask, render_template, jsonify, send_file
+from flask import Flask, render_template, jsonify, send_file, session
 import os
 import pandas as pd
 import io
 from datetime import datetime
 from model1 import GasPricePredictor
+from flask_session import Session
 
 app = Flask(__name__)
 
 # Configuration
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'OGEllO09BgxinM54A1nHEKTcU8juJuI5CvdUIvNe')
+app.config['SESSION_TYPE'] = 'filesystem'
+Session(app)
 
 # Instance du modèle
 predictor = GasPricePredictor()
@@ -19,21 +22,18 @@ def landing():
 
 @app.route("/model1")
 def model1():
+    # Générer ou récupérer l'identifiant de session
+    if 'sid' not in session:
+        session['sid'] = os.urandom(24).hex()
+    
     try:
-        # Get predictions, metrics, and performance chart
-        prediction = predictor.get_prediction()
-        weekly_stats = predictor.get_weekly_prediction()
-        metrics = predictor.get_model_metrics()
-        chart_data = predictor.get_performance_chart()  # Get base64-encoded chart
+        # Get weekly predictions and performance chart
+        weekly_stats = predictor.get_weekly_prediction(session['sid'])
+        metrics = predictor.get_model_metrics(session['sid'])
+        chart_data = predictor.get_performance_chart(session['sid'])
 
-        # Prepare data for template
         return render_template(
             "model1.html",
-            current_price=prediction['current_price'],
-            predicted_price=prediction['predicted_price'],
-            price_change=prediction['price_change'],
-            price_change_pct=prediction['price_change_pct'],
-            prediction_date=prediction['prediction_date'],
             weekly_predictions=weekly_stats['predictions'],
             weekly_summary={
                 'week_start_price': weekly_stats['week_start_price'],
@@ -42,42 +42,34 @@ def model1():
                 'total_change_pct': weekly_stats['total_change_pct'],
                 'max_price': weekly_stats['max_price'],
                 'min_price': weekly_stats['min_price'],
-                'avg_price': weekly_stats['avg_price']
+                'avg_price': weekly_stats['avg_price'],
+                'volatility': weekly_stats['volatility']
             },
             metrics=metrics,
-            chart_data=chart_data,  # Pass chart data to template
+            chart_data=chart_data,
             error=None
         )
     except Exception as e:
-        # Handle errors gracefully
         return render_template(
             "model1.html",
-            current_price="N/A",
-            predicted_price="N/A",
-            price_change="N/A",
-            price_change_pct="N/A",
-            prediction_date="N/A",
             weekly_predictions=[],
             weekly_summary={},
-            metrics={'r2_score': 'N/A', 'mae': 'N/A', 'rmse': 'N/A', 'last_trained': 'N/A'},
-            chart_data=None,  # Pass None if chart generation fails
-            error=f"Error loading predictions or chart: {str(e)}"
+            metrics={'status': 'non_simulated', 'message': 'Aucune simulation effectuée'},
+            chart_data=None,
+            error=f"Erreur lors du chargement des prédictions ou du graphique: {str(e)}"
         )
 
 @app.route("/api/predict", methods=['GET'])
 def predict_gas_price():
     """API endpoint pour obtenir la prédiction"""
+    if 'sid' not in session:
+        session['sid'] = os.urandom(24).hex()
+    
     try:
-        result = predictor.get_prediction()
-        weekly_stats = predictor.get_weekly_prediction()
+        weekly_stats = predictor.get_weekly_prediction(session['sid'])
         
         return jsonify({
             "success": True,
-            "current_price": result['current_price'],
-            "predicted_price": result['predicted_price'],
-            "price_change": result['price_change'],
-            "price_change_pct": result['price_change_pct'],
-            "prediction_date": result['prediction_date'],
             "weekly_predictions": weekly_stats['predictions'],
             "weekly_summary": {
                 "week_start_price": weekly_stats['week_start_price'],
@@ -86,7 +78,9 @@ def predict_gas_price():
                 "total_change_pct": weekly_stats['total_change_pct'],
                 "max_price": weekly_stats['max_price'],
                 "min_price": weekly_stats['min_price'],
-                "avg_price": weekly_stats['avg_price']
+                "avg_price": weekly_stats['avg_price'],
+                "volatility": weekly_stats['volatility'],
+                "price_distribution": weekly_stats['price_distribution']
             },
             "last_updated": datetime.now().isoformat()
         })
@@ -99,8 +93,11 @@ def predict_gas_price():
 @app.route("/api/model-performance", methods=['GET'])
 def model_performance():
     """API endpoint pour les métriques du modèle"""
+    if 'sid' not in session:
+        session['sid'] = os.urandom(24).hex()
+    
     try:
-        metrics = predictor.get_model_metrics()
+        metrics = predictor.get_model_metrics(session['sid'])
         return jsonify({
             "success": True,
             "metrics": metrics
@@ -114,9 +111,12 @@ def model_performance():
 @app.route("/api/download-report", methods=['GET'])
 def download_report():
     """API endpoint pour télécharger le rapport"""
+    if 'sid' not in session:
+        session['sid'] = os.urandom(24).hex()
+    
     try:
-        weekly_stats = predictor.get_weekly_prediction()
-        metrics = predictor.get_model_metrics()
+        weekly_stats = predictor.get_weekly_prediction(session['sid'])
+        metrics = predictor.get_model_metrics(session['sid'])
         
         # Create CSV report
         output = io.StringIO()
@@ -127,11 +127,26 @@ def download_report():
         df.to_csv(output, index=False)
         output.write('\nWeekly Summary\n')
         for key, value in weekly_stats.items():
-            if key != 'predictions':
+            if key not in ['predictions', 'price_paths', 'price_distribution']:
+                output.write(f'{key.replace("_", " ").title()}: {value}\n')
+        output.write('\nPrice Distribution\n')
+        for key, value in weekly_stats['price_distribution'].items():
+            if key == 'percentiles':
+                for p, v in value.items():
+                    output.write(f'{p}th Percentile: {v}\n')
+            else:
                 output.write(f'{key.replace("_", " ").title()}: {value}\n')
         output.write('\nModel Performance Metrics\n')
         for key, value in metrics.items():
-            output.write(f'{key.replace("_", " ").title()}: {value}\n')
+            if key == 'metrics':
+                for k, v in value.items():
+                    if k == 'percentiles':
+                        for p, pv in v.items():
+                            output.write(f'{p}th Percentile: {pv}\n')
+                    else:
+                        output.write(f'{k.replace("_", " ").title()}: {v}\n')
+            else:
+                output.write(f'{key.replace("_", " ").title()}: {value}\n')
         
         # Prepare CSV file for download
         output.seek(0)
