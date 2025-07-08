@@ -259,27 +259,27 @@ class GasPricePredictor:
             
             # Zone de confiance 80% (10e-90e percentile)
             ax_main.fill_between(dates, percentiles[0], percentiles[3], 
-                               alpha=0.2, color='#3b82f6', label='Zone de confiance 80%')
+                               alpha=0.2, color='#3b82f6', label='Confidence zone 80%')
             
             # Zone de confiance 50% (25e-75e percentile)
             ax_main.fill_between(dates, percentiles[1], percentiles[2], 
-                               alpha=0.3, color='#1d4ed8', label='Zone de confiance 50%')
+                               alpha=0.3, color='#1d4ed8', label='Confidence zone 50%')
             
             # Tracer la médiane des trajectoires
             median_prices = np.median(paths[:, 1:], axis=0)
             ax_main.plot(dates, median_prices, color='#dc2626', linewidth=3, 
-                        label='Médiane des trajectoires', linestyle='-')
+                        label='Median of the trajectories', linestyle='-')
             
             # Tracer la moyenne des trajectoires
             mean_prices = np.mean(paths[:, 1:], axis=0)
             ax_main.plot(dates, mean_prices, color='#f59e0b', linewidth=3, 
-                        label='Moyenne des trajectoires', linestyle='--')
+                        label='Mean of trajectories', linestyle='--')
             
             # Styling du graphique principal
-            ax_main.set_title('Trajectoires Simulées des Prix du Gaz Naturel\n(Modèle Black-Scholes-Merton)', 
+            ax_main.set_title('Simulated trajectories of Natural Gas Price\n(Modèle Black-Scholes-Merton)', 
                             fontsize=16, fontweight='bold', color='#1f2937', pad=20)
             ax_main.set_xlabel('Date', fontsize=12, color='#374151', fontweight='500')
-            ax_main.set_ylabel('Prix ($/MMBtu)', fontsize=12, color='#374151', fontweight='500')
+            ax_main.set_ylabel('Price ($/MMBtu)', fontsize=12, color='#374151', fontweight='500')
             ax_main.legend(fontsize=10, loc='upper left', frameon=True, fancybox=True, shadow=True)
             
             # Grille moderne
@@ -307,9 +307,9 @@ class GasPricePredictor:
             for i, patch in enumerate(patches):
                 patch.set_facecolor(plt.cm.Blues(0.3 + 0.5 * i / len(patches)))
             
-            ax_hist.set_xlabel('Fréquence', fontsize=10, color='#374151')
-            ax_hist.set_ylabel('Prix Final ($/MMBtu)', fontsize=10, color='#374151')
-            ax_hist.set_title('Distribution\ndes Prix Finaux', fontsize=12, fontweight='bold', color='#1f2937')
+            ax_hist.set_xlabel('Frequency', fontsize=10, color='#374151')
+            ax_hist.set_ylabel('Final Price ($/MMBtu)', fontsize=10, color='#374151')
+            ax_hist.set_title('Distribution\ndes Final Prices', fontsize=12, fontweight='bold', color='#1f2937')
             ax_hist.tick_params(colors='#4b5563', labelsize=9)
             ax_hist.grid(True, alpha=0.3, linestyle='-', linewidth=0.5, color='#9ca3af')
             
