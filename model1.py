@@ -224,57 +224,146 @@ class GasPricePredictor:
             raise
 
     def get_performance_chart(self, session_id):
-        """Generate chart showing simulated price paths and distribution, styled like the example"""
+        """Generate chart showing simulated price paths and distribution with improved white background styling"""
         if session_id not in self.user_cache or not self.user_cache[session_id].get('test_data'):
             raise ValueError("Données de simulation non disponibles. Veuillez d'abord exécuter get_weekly_prediction.")
         
         try:
-            plt.style.use('dark_background')
-            fig = plt.figure(figsize=(12, 6))
-            fig.patch.set_facecolor('#1a1a1a')
-            ax = fig.add_subplot(111)
+            # Configuration du style moderne avec fond blanc
+            plt.style.use('default')
+            fig = plt.figure(figsize=(14, 8))
+            fig.patch.set_facecolor('white')
+            
+            # Création d'un layout avec grille pour plus de sophistication
+            gs = fig.add_gridspec(2, 2, height_ratios=[3, 1], width_ratios=[4, 1], 
+                                hspace=0.3, wspace=0.3)
+            
+            # Graphique principal des trajectoires
+            ax_main = fig.add_subplot(gs[0, 0])
+            ax_main.set_facecolor('#fafafa')
             
             # Récupérer les données de l'utilisateur
             test_data = self.user_cache[session_id]['test_data']
             dates = pd.to_datetime(test_data['dates'])
             paths = np.array(test_data['price_paths'])
             
-            # Tracer les trajectoires (jusqu'à 100 pour la lisibilité)
-            for i in range(min(100, len(paths))):
-                ax.plot(dates, paths[i, 1:], color='#60a5fa', alpha=0.1, linewidth=1)
+            # Tracer les trajectoires individuelles avec un dégradé de couleurs
+            n_paths_to_show = min(150, len(paths))
+            colors = plt.cm.Blues(np.linspace(0.3, 0.7, n_paths_to_show))
+            
+            for i in range(n_paths_to_show):
+                ax_main.plot(dates, paths[i, 1:], color=colors[i], alpha=0.4, linewidth=0.8)
+            
+            # Calculer les percentiles pour la zone de confiance
+            percentiles = np.percentile(paths[:, 1:], [10, 25, 75, 90], axis=0)
+            
+            # Zone de confiance 80% (10e-90e percentile)
+            ax_main.fill_between(dates, percentiles[0], percentiles[3], 
+                               alpha=0.2, color='#3b82f6', label='Zone de confiance 80%')
+            
+            # Zone de confiance 50% (25e-75e percentile)
+            ax_main.fill_between(dates, percentiles[1], percentiles[2], 
+                               alpha=0.3, color='#1d4ed8', label='Zone de confiance 50%')
+            
+            # Tracer la médiane des trajectoires
+            median_prices = np.median(paths[:, 1:], axis=0)
+            ax_main.plot(dates, median_prices, color='#dc2626', linewidth=3, 
+                        label='Médiane des trajectoires', linestyle='-')
             
             # Tracer la moyenne des trajectoires
             mean_prices = np.mean(paths[:, 1:], axis=0)
-            ax.plot(dates, mean_prices, color='#f59e0b', linewidth=3, label='Moyenne des Trajectoires')
+            ax_main.plot(dates, mean_prices, color='#f59e0b', linewidth=3, 
+                        label='Moyenne des trajectoires', linestyle='--')
             
-            ax.set_title('Trajectoires Simulées des Prix du Gaz Naturel (BSM)', 
-                        fontsize=16, fontweight='bold', color='white', pad=20)
-            ax.set_xlabel('Date', fontsize=12, color='white')
-            ax.set_ylabel('Prix ($/MMBtu)', fontsize=12, color='white')
-            ax.legend(fontsize=12, loc='upper left')
-            ax.grid(True, alpha=0.3)
-            ax.tick_params(colors='white')
+            # Styling du graphique principal
+            ax_main.set_title('Trajectoires Simulées des Prix du Gaz Naturel\n(Modèle Black-Scholes-Merton)', 
+                            fontsize=16, fontweight='bold', color='#1f2937', pad=20)
+            ax_main.set_xlabel('Date', fontsize=12, color='#374151', fontweight='500')
+            ax_main.set_ylabel('Prix ($/MMBtu)', fontsize=12, color='#374151', fontweight='500')
+            ax_main.legend(fontsize=10, loc='upper left', frameon=True, fancybox=True, shadow=True)
             
-            ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
-            ax.xaxis.set_major_locator(mdates.DayLocator())
-            plt.setp(ax.xaxis.get_majorticklabels(), rotation=45)
+            # Grille moderne
+            ax_main.grid(True, alpha=0.3, linestyle='-', linewidth=0.5, color='#9ca3af')
+            ax_main.set_axisbelow(True)
             
-            # Ajouter un encadré avec les statistiques
+            # Couleurs des ticks
+            ax_main.tick_params(colors='#4b5563', labelsize=10)
+            
+            # Format des dates
+            ax_main.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
+            ax_main.xaxis.set_major_locator(mdates.DayLocator(interval=1))
+            plt.setp(ax_main.xaxis.get_majorticklabels(), rotation=45, ha='right')
+            
+            # Histogramme des prix finaux
+            ax_hist = fig.add_subplot(gs[0, 1])
+            ax_hist.set_facecolor('#fafafa')
+            
+            final_prices = paths[:, -1]
+            n_bins = 30
+            counts, bins, patches = ax_hist.hist(final_prices, bins=n_bins, orientation='horizontal',
+                                               alpha=0.7, color='#3b82f6', edgecolor='white', linewidth=0.5)
+            
+            # Colorer l'histogramme avec un dégradé
+            for i, patch in enumerate(patches):
+                patch.set_facecolor(plt.cm.Blues(0.3 + 0.5 * i / len(patches)))
+            
+            ax_hist.set_xlabel('Fréquence', fontsize=10, color='#374151')
+            ax_hist.set_ylabel('Prix Final ($/MMBtu)', fontsize=10, color='#374151')
+            ax_hist.set_title('Distribution\ndes Prix Finaux', fontsize=12, fontweight='bold', color='#1f2937')
+            ax_hist.tick_params(colors='#4b5563', labelsize=9)
+            ax_hist.grid(True, alpha=0.3, linestyle='-', linewidth=0.5, color='#9ca3af')
+            
+            # Tableau des statistiques
+            ax_stats = fig.add_subplot(gs[1, :])
+            ax_stats.axis('off')
+            
+            # Préparer les données statistiques
             dist_stats = test_data['price_distribution']
-            metrics_text = (f"Moyenne finale: ${dist_stats['mean']:.2f}\n"
-                          f"Écart-type: ${dist_stats['std']:.2f}\n"
-                          f"5e percentile: ${dist_stats['percentiles']['5']:.2f}\n"
-                          f"95e percentile: ${dist_stats['percentiles']['95']:.2f}")
+            current_price = self.user_cache[session_id]['weekly_stats']['current_price']
             
-            props = dict(boxstyle='round,pad=0.5', facecolor='#2a2a2a', alpha=0.8, edgecolor='white')
-            ax.text(0.02, 0.98, metrics_text, transform=ax.transAxes, fontsize=11,
-                   verticalalignment='top', bbox=props, color='white')
+            stats_data = [
+                ['Métrique', 'Valeur', 'Variation vs Actuel'],
+                ['Prix Actuel', f"${current_price:.3f}", '-'],
+                ['Prix Moyen Final', f"${dist_stats['mean']:.3f}", 
+                 f"{((dist_stats['mean'] - current_price) / current_price * 100):+.2f}%"],
+                ['Écart-Type', f"${dist_stats['std']:.3f}", '-'],
+                ['5e Percentile', f"${dist_stats['percentiles']['5']:.3f}", 
+                 f"{((dist_stats['percentiles']['5'] - current_price) / current_price * 100):+.2f}%"],
+                ['95e Percentile', f"${dist_stats['percentiles']['95']:.3f}", 
+                 f"{((dist_stats['percentiles']['95'] - current_price) / current_price * 100):+.2f}%"],
+            ]
             
+            # Créer le tableau
+            table = ax_stats.table(cellText=stats_data[1:], colLabels=stats_data[0],
+                                 cellLoc='center', loc='center', 
+                                 colWidths=[0.25, 0.25, 0.25])
+            
+            # Style du tableau
+            table.auto_set_font_size(False)
+            table.set_fontsize(10)
+            table.scale(1, 2)
+            
+            # Colorer l'en-tête
+            for i in range(len(stats_data[0])):
+                table[(0, i)].set_facecolor('#3b82f6')
+                table[(0, i)].set_text_props(weight='bold', color='white')
+            
+            # Colorer les cellules alternativement
+            for i in range(1, len(stats_data)):
+                for j in range(len(stats_data[0])):
+                    if i % 2 == 0:
+                        table[(i, j)].set_facecolor('#f8fafc')
+                    else:
+                        table[(i, j)].set_facecolor('white')
+                    table[(i, j)].set_edgecolor('#e2e8f0')
+            
+            # Ajuster la mise en page
             plt.tight_layout()
             
+            # Sauvegarder le graphique
             buffer = BytesIO()
-            plt.savefig(buffer, format='png', facecolor='#1a1a1a', 
-                       bbox_inches='tight', dpi=150, edgecolor='none')
+            plt.savefig(buffer, format='png', facecolor='white', 
+                       bbox_inches='tight', dpi=300, edgecolor='none')
             buffer.seek(0)
             
             chart_data = base64.b64encode(buffer.getvalue()).decode()
