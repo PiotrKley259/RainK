@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import requests
 import warnings
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import json
 import base64
 from io import BytesIO
@@ -140,7 +140,9 @@ class GasPricePredictor:
                 raise ValueError("Pas de données disponibles pour la prédiction")
             
             current_price = df['Price'].iloc[-1]
-            current_date = df['date'].iloc[-1]
+            current_date = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
+
+
             drift, volatility = self.estimate_bsm_parameters(df)
             
             # Simulate 1000 price paths for the next 7 days
@@ -309,7 +311,7 @@ class GasPricePredictor:
             
             ax_hist.set_xlabel('Frequency', fontsize=10, color='#374151')
             ax_hist.set_ylabel('Final Price ($/MMBtu)', fontsize=10, color='#374151')
-            ax_hist.set_title('Distribution\ndes Final Prices', fontsize=12, fontweight='bold', color='#1f2937')
+            ax_hist.set_title('Distribution\n of Final Prices', fontsize=12, fontweight='bold', color='#1f2937')
             ax_hist.tick_params(colors='#4b5563', labelsize=9)
             ax_hist.grid(True, alpha=0.3, linestyle='-', linewidth=0.5, color='#9ca3af')
             
