@@ -322,11 +322,11 @@ class GasPricePredictor:
             current_price = self.user_cache[session_id]['weekly_stats']['current_price']
             
             stats_data = [
-                ['Métrique', 'Valeur', 'Variation vs Actuel'],
-                ['Prix Actuel', f"${current_price:.3f}", '-'],
-                ['Prix Moyen Final', f"${dist_stats['mean']:.3f}", 
+                ['Metrics', 'Values', 'Variation vs Actual'],
+                ['Actual Price', f"${current_price:.3f}", '-'],
+                ['Final Mean Price', f"${dist_stats['mean']:.3f}", 
                  f"{((dist_stats['mean'] - current_price) / current_price * 100):+.2f}%"],
-                ['Écart-Type', f"${dist_stats['std']:.3f}", '-'],
+                ['Std', f"${dist_stats['std']:.3f}", '-'],
                 ['5e Percentile', f"${dist_stats['percentiles']['5']:.3f}", 
                  f"{((dist_stats['percentiles']['5'] - current_price) / current_price * 100):+.2f}%"],
                 ['95e Percentile', f"${dist_stats['percentiles']['95']:.3f}", 
