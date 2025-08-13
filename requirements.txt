@@ -1,4 +1,5 @@
 Flask==2.3.3
+flask-session
 requests
 python-dotenv
 pandas
@@ -7,6 +8,6 @@ yfinance
 scikit-learn
 xgboost
 matplotlib
-flask_session
-statsmodel
-sklearn
+statsmodels
+scipy
+seaborn
