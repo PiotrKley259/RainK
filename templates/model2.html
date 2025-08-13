@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pair Trading Analysis - Stock Selection</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .ticker-input:focus {
+            transform: scale(1.02);
+            transition: transform 0.2s ease;
+        }
+        
+        .validation-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .ticker-card {
+            transition: all 0.3s ease;
+        }
+        
+        .ticker-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg shadow-lg">
+        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold text-white mb-2">Pair Trading Analysis</h1>
+                <p class="text-xl text-gray-100">Discover correlation opportunities between any two stocks</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- Instructions Section -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <div class="text-center mb-8">
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-4">
+                    <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 00 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">How It Works</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    Enter any two stock ticker symbols to analyze their correlation and determine if they're suitable for a pair trading strategy. 
+                    Our advanced algorithm will calculate correlation coefficients, test for cointegration, and provide actionable trading recommendations.
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-6 text-center">
+                <div class="p-4">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl font-bold text-green-600">1</span>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">Enter Tickers</h3>
+                    <p class="text-sm text-gray-600">Input any valid stock ticker symbols (e.g., AAPL, TSLA, GOOGL)</p>
+                </div>
+                <div class="p-4">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl font-bold text-blue-600">2</span>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">Analysis</h3>
+                    <p class="text-sm text-gray-600">We'll analyze correlation, cointegration, and volatility patterns</p>
+                </div>
+                <div class="p-4">
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl font-bold text-purple-600">3</span>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">Get Results</h3>
+                    <p class="text-sm text-gray-600">Receive detailed recommendations and trading strategies</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stock Selection Form -->
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <form id="pairAnalysisForm" action="/model2/analysis" method="GET" class="space-y-8">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- First Stock -->
+                    <div class="ticker-card bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-200">
+                        <label for="ticker1" class="block text-lg font-semibold text-gray-900 mb-4">
+                            First Stock
+                        </label>
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                id="ticker1" 
+                                name="ticker1" 
+                                placeholder="e.g., AAPL" 
+                                maxlength="10"
+                                class="ticker-input w-full px-4 py-3 text-lg font-mono uppercase border-2 border-blue-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                                required
+                            >
+                            <div id="ticker1-validation" class="mt-3 hidden">
+                                <div class="flex items-center space-x-2">
+                                    <div class="validation-spinner w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full hidden"></div>
+                                    <span class="text-sm validation-message"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="ticker1-info" class="mt-4 p-3 bg-blue-100 rounded-lg hidden">
+                            <p class="text-sm text-blue-800 font-medium" id="ticker1-company"></p>
+                        </div>
+                    </div>
+
+                    <!-- Second Stock -->
+                    <div class="ticker-card bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-6 border border-purple-200">
+                        <label for="ticker2" class="block text-lg font-semibold text-gray-900 mb-4">
+                            Second Stock
+                        </label>
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                id="ticker2" 
+                                name="ticker2" 
+                                placeholder="e.g., TSLA" 
+                                maxlength="10"
+                                class="ticker-input w-full px-4 py-3 text-lg font-mono uppercase border-2 border-purple-300 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
+                                required
+                            >
+                            <div id="ticker2-validation" class="mt-3 hidden">
+                                <div class="flex items-center space-x-2">
+                                    <div class="validation-spinner w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full hidden"></div>
+                                    <span class="text-sm validation-message"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="ticker2-info" class="mt-4 p-3 bg-purple-100 rounded-lg hidden">
+                            <p class="text-sm text-purple-800 font-medium" id="ticker2-company"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Time Period Selection -->
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <label for="period" class="block text-lg font-semibold text-gray-900 mb-4">
+                        Analysis Period
+                    </label>
+                    <select 
+                        id="period" 
+                        name="period" 
+                        class="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                    >
+                        <option value="6mo">6 Months</option>
+                        <option value="1y" selected>1 Year</option>
+                        <option value="2y">2 Years</option>
+                        <option value="5y">5 Years</option>
+                    </select>
+                    <p class="mt-2 text-sm text-gray-600">
+                        Longer periods provide more robust statistical analysis but may miss recent market regime changes.
+                    </p>
+                </div>
+
+                <!-- Popular Examples -->
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Popular Pair Trading Examples</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <button type="button" class="example-pair px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium" data-ticker1="AAPL" data-ticker2="MSFT">
+                            AAPL vs MSFT
+                        </button>
+                        <button type="button" class="example-pair px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium" data-ticker1="JPM" data-ticker2="BAC">
+                            JPM vs BAC
+                        </button>
+                        <button type="button" class="example-pair px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium" data-ticker1="KO" data-ticker2="PEP">
+                            KO vs PEP
+                        </button>
+                        <button type="button" class="example-pair px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium" data-ticker1="XOM" data-ticker2="CVX">
+                            XOM vs CVX
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="text-center">
+                    <button 
+                        type="submit" 
+                        id="analyzeButton"
+                        class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled
+                    >
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        Analyze Pair Trading Opportunity
+                    </button>
+                    <p class="mt-3 text-sm text-gray-600">
+                        Analysis typically takes 5-10 seconds depending on data availability
+                    </p>
+                </div>
+            </form>
+        </div>
+
+        <!-- Back to Home -->
+        <div class="text-center mt-8">
+            <a href="/" class="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                Back to Homepage
+            </a>
+        </div>
+    </main>
+
+    <script>
+        // Ticker validation and form handling
+        let validationTimeouts = {};
+        let validTickers = {ticker1: false, ticker2: false};
+
+        // Convert inputs to uppercase
+        document.querySelectorAll('input[type="text"]').forEach(input => {
+            input.addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
+            });
+        });
+
+        // Validate ticker function
+        async function validateTicker(tickerInput, tickerNumber) {
+            const ticker = tickerInput.value.trim();
+            const validationDiv = document.getElementById(`ticker${tickerNumber}-validation`);
+            const infoDiv = document.getElementById(`ticker${tickerNumber}-info`);
+            const companySpan = document.getElementById(`ticker${tickerNumber}-company`);
+            const spinner = validationDiv.querySelector('.validation-spinner');
+            const message = validationDiv.querySelector('.validation-message');
+
+            // Clear previous timeout
+            if (validationTimeouts[tickerNumber]) {
+                clearTimeout(validationTimeouts[tickerNumber]);
+            }
+
+            // Hide info and validation
+            infoDiv.classList.add('hidden');
+            validationDiv.classList.add('hidden');
+            validTickers[`ticker${tickerNumber}`] = false;
+            updateSubmitButton();
+
+            if (!ticker || ticker.length < 1) return;
+
+            // Show loading
+            validationDiv.classList.remove('hidden');
+            spinner.classList.remove('hidden');
+            message.textContent = 'Validating...';
+            message.className = 'text-sm validation-message text-gray-600';
+
+            // Debounced validation
+            validationTimeouts[tickerNumber] = setTimeout(async () => {
+                try {
+                    const response = await fetch('/api/validate-ticker', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ticker: ticker})
+                    });
+
+                    const data = await response.json();
+                    spinner.classList.add('hidden');
+
+                    if (data.success) {
+                        message.textContent = '✓ Valid ticker';
+                        message.className = 'text-sm validation-message text-green-600';
+                        companySpan.textContent = data.company_name;
+                        infoDiv.classList.remove('hidden');
+                        validTickers[`ticker${tickerNumber}`] = true;
+                    } else {
+                        message.textContent = `✗ ${data.error}`;
+                        message.className = 'text-sm validation-message text-red-600';
+                        validTickers[`ticker${tickerNumber}`] = false;
+                    }
+                } catch (error) {
+                    spinner.classList.add('hidden');
+                    message.textContent = '✗ Validation error';
+                    message.className = 'text-sm validation-message text-red-600';
+                    validTickers[`ticker${tickerNumber}`] = false;
+                }
+                updateSubmitButton();
+            }, 800);
+        }
+
+        // Update submit button state
+        function updateSubmitButton() {
+            const button = document.getElementById('analyzeButton');
+            const ticker1Value = document.getElementById('ticker1').value.trim();
+            const ticker2Value = document.getElementById('ticker2').value.trim();
+            
+            // Check if both tickers are different and valid
+            const bothValid = validTickers.ticker1 && validTickers.ticker2;
+            const different = ticker1Value !== ticker2Value;
+            const bothFilled = ticker1Value.length > 0 && ticker2Value.length > 0;
+
+            button.disabled = !(bothValid && different && bothFilled);
+            
+            if (bothFilled && !different) {
+                // Show error for same tickers
+                document.querySelectorAll('.validation-message').forEach(msg => {
+                    msg.textContent = '⚠ Please select different tickers';
+                    msg.className = 'text-sm validation-message text-yellow-600';
+                });
+            }
+        }
+
+        // Add event listeners
+        document.getElementById('ticker1').addEventListener('input', function() {
+            validateTicker(this, 1);
+        });
+
+        document.getElementById('ticker2').addEventListener('input', function() {
+            validateTicker(this, 2);
+        });
+
+        // Example pairs
+        document.querySelectorAll('.example-pair').forEach(button => {
+            button.addEventListener('click', function() {
+                const ticker1 = this.dataset.ticker1;
+                const ticker2 = this.dataset.ticker2;
+                
+                document.getElementById('ticker1').value = ticker1;
+                document.getElementById('ticker2').value = ticker2;
+                
+                // Trigger validation
+                validateTicker(document.getElementById('ticker1'), 1);
+                validateTicker(document.getElementById('ticker2'), 2);
+            });
+        });
+
+        // Form submission handling
+        document.getElementById('pairAnalysisForm').addEventListener('submit', function(e) {
+            const button = document.getElementById('analyzeButton');
+            if (button.disabled) {
+                e.preventDefault();
+                return;
+            }
+
+            // Show loading state
+            button.innerHTML = `
+                <svg class="animate-spin w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Analyzing...
+            `;
+            button.disabled = true;
+        });
+    </script>
+</body>
+</html>
