@@ -50,6 +50,18 @@ class PairTradingAnalyzer:
             print(f"Fetching data for {tickers} over {period}")
             data = yf.download(tickers, period=period, progress=False)['Adj Close']
             
+            if data.empty:
+                raise ValueError("No data returned for given tickers and period.")
+
+            # Handle missing 'Adj Close'
+            if 'Adj Close' in data.columns:
+                data = data['Adj Close']
+            elif 'Close' in data.columns:
+                data = data['Close']
+            else:
+                raise ValueError("No suitable price column found (Adj Close / Close missing).")
+
+            
             if len(tickers) == 1:
                 data = data.to_frame()
                 data.columns = tickers
