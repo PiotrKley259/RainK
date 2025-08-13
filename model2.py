@@ -45,36 +45,37 @@ class PairTradingAnalyzer:
             return False, f"Invalid ticker '{ticker}': {str(e)}"
 
     def fetch_stock_data(self, tickers, period='1y'):
-        """Fetch stock data from Yahoo Finance"""
         try:
             print(f"Fetching data for {tickers} over {period}")
-            data = yf.download(tickers, period=period, progress=False)['Adj Close']
-            
-            if data.empty:
+            raw_data = yf.download(tickers, period=period, progress=False)
+
+            if raw_data.empty:
                 raise ValueError("No data returned for given tickers and period.")
 
-            # Handle missing 'Adj Close'
-            if 'Adj Close' in data.columns:
-                data = data['Adj Close']
-            elif 'Close' in data.columns:
-                data = data['Close']
+            # Handle multi-index (multiple tickers) vs single index
+            if isinstance(raw_data.columns, pd.MultiIndex):
+                if 'Adj Close' in raw_data.columns.get_level_values(0):
+                    data = raw_data['Adj Close']
+                elif 'Close' in raw_data.columns.get_level_values(0):
+                    data = raw_data['Close']
+                else:
+                    raise ValueError("No suitable price column found.")
             else:
-                raise ValueError("No suitable price column found (Adj Close / Close missing).")
+                if 'Adj Close' in raw_data.columns:
+                    data = raw_data[['Adj Close']].rename(columns={'Adj Close': tickers[0]})
+                elif 'Close' in raw_data.columns:
+                    data = raw_data[['Close']].rename(columns={'Close': tickers[0]})
+                else:
+                    raise ValueError("No suitable price column found.")
 
-            
-            if len(tickers) == 1:
-                data = data.to_frame()
-                data.columns = tickers
-            
-            # Remove any missing data
             data = data.dropna()
-            
-            if len(data) < 50:  # Minimum data points required
-                raise ValueError("Insufficient data points for analysis")
-                
+
+            if len(data) < 50:
+                raise ValueError("Insufficient data points for analysis.")
+
             print(f"Successfully fetched {len(data)} data points")
             return data
-            
+
         except Exception as e:
             raise Exception(f"Error fetching stock data: {str(e)}")
 
