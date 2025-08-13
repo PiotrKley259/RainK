@@ -8,3 +8,5 @@ scikit-learn
 xgboost
 matplotlib
 flask_session
+statsmodel
+sklearn
